@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Trips B Cup Series — Season 2 Standings</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0d12;color:#e9edf2;font-family:"Arial Narrow","Roboto Condensed",system-ui,sans-serif}
+    input[type=range]{-webkit-appearance:none;width:100%}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#f7c948;cursor:pointer;margin-top:-6px}
+    input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:#1e2630}
+    button{font-family:inherit}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react">
+const { useState, useMemo } = React;
+const { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } = Recharts;
+
+/* NASCAR 25 — Season 2 Points Standings + driver history.
+   Race + MLL points verified vs. Master Database Bible v3.2; average-finish
+   cross-checked for all 47 entries. Stage points re-scored 10-9-8 (league
+   rule change, applied to all 12 races), so cumulative totals now exceed the
+   Bible's 4-3-2 figures by design. Car colors evoke each entry's real-life
+   team identity; #15/#27/#13 use the league's custom schemes. */
+
+const WINNERS = ["27","16","34","12","15","24","48","6","34","15","47","41","51","8"];
+const TRACKS = ["Daytona","Las Vegas","Phoenix","COTA","Bristol","Kansas","Talladega","Texas","Dover","Atlanta","Martinsville","Charlotte","Nashville","Darlington"];
+// Season 1 — "Chase for the Kachow Cup". Winners mapped to CURRENT car numbers:
+// Brandon drove #87 in S1 (now #27); Brandt drove #24 in S1 (now #15). No stage points in S1.
+const S1_TRACKS = ["Daytona","Las Vegas","Atlanta","Phoenix","Bristol","Dover","COTA","Richmond","Texas","Kansas","Talladega","Martinsville","Charlotte","Darlington","Sonoma","New Hampshire","Michigan","Nashville","Iowa","Chicago","Pocono","Indy","Gateway","Watkins Glen","Richmond","Daytona","Darlington","Texas","Bristol","Homestead","Sonoma","Las Vegas","Martinsville","Talladega","Phoenix","Atlanta"];
+const S1_WINNERS = ["6","19","15","45","41","48","23","20","35","15","15","41","27","1","41","45","99","88","27","77","17","27","27","20","21","01","23","9","6","27","45","51","60","27","48","77"];
+const DRIVERS = [{"car": "15", "name": "Brandt Ross", "status": "Human", "r": [32, 34, 38, 21, 45, 35, 43, 30, 39, 50, 37, 33, 35, 24], "fin": [9, 7, 3, 20, 1, 6, 3, 11, 2, 1, 4, 8, 6, 17], "off": 1, "cb": "#4FA8E0", "cn": "#FFFFFF", "cs": "#0B3D91", "s1w": 3, "sw": 2, "sp": 0, "mll": 2, "honor": "S1 Runner-Up", "team": "Trips B Racing", "mfr": "Chevy"}, {"car": "27", "name": "Brandon Ross", "status": "Human", "r": [45, 39, 37, 17, 38, 32, 37, 38, 7, 31, 29, 36, 39, 36], "fin": [1, 2, 4, 24, 3, 9, 4, 3, 34, 10, 12, 5, 2, 5], "off": 2, "cb": "#00913F", "cn": "#FFFFFF", "cs": "#FFFFFF", "s1w": 6, "sw": 0, "sp": 0, "mll": 0, "honor": "S1 Champion", "team": "Trips B Racing", "mfr": "Chevy"}, {"car": "34", "name": "Todd Gilliland", "status": "CPU", "r": [31, 37, 77, 39, 4, 37, 22, 4, 55, 18, 11, 23, 20, 23], "fin": [10, 4, 1, 10, 37, 4, 19, 37, 1, 23, 30, 18, 21, 18], "off": 4, "cb": "#FFD200", "cn": "#111111", "cs": "#111111", "s1w": 0, "sw": 0, "sp": 25, "mll": 1, "team": "Front Row Motorsports", "mfr": "Ford"}, {"car": "6", "name": "Brad Keselowski", "status": "CPU", "r": [37, 28, 22, 33, 16, 18, 15, 73, 31, 15, 9, 55, 33, 33], "fin": [4, 13, 19, 8, 25, 23, 26, 1, 10, 26, 32, 10, 8, 8], "off": 3, "cb": "#007A3D", "cn": "#E4002B", "cs": "#E4002B", "s1w": 2, "sw": 1, "sp": 37, "mll": 1, "team": "RFK Racing", "mfr": "Ford"}, {"car": "17", "name": "Chris Buescher", "status": "CPU", "r": [36, 35, 23, 25, 37, 34, 33, 11, 17, 9, 17, 50, 49, 12], "fin": [5, 6, 18, 16, 4, 7, 17, 30, 24, 32, 24, 7, 9, 29], "off": 6, "cb": "#00529B", "cn": "#FFFFFF", "cs": "#4CBB17", "s1w": 1, "sw": 0, "sp": 42, "mll": 0, "team": "RFK Racing", "mfr": "Ford"}, {"car": "1", "name": "Ross Chastain", "status": "CPU", "r": [12, 55, 51, 34, 25, 7, 35, 17, 5, 30, 21, 39, 27, 25], "fin": [29, 3, 8, 7, 16, 34, 6, 24, 36, 11, 20, 2, 14, 16], "off": 7, "cb": "#FF7900", "cn": "#111111", "cs": "#FFFFFF", "s1w": 1, "sw": 1, "sp": 35, "mll": 0, "team": "Trackhouse Racing", "mfr": "Chevy"}, {"car": "41", "name": "Cole Custer", "status": "CPU", "r": [43, 10, 36, 16, 8, 25, 3, 22, 27, 22, 31, 74, 36, 38], "fin": [3, 31, 5, 25, 33, 16, 38, 19, 14, 19, 10, 1, 5, 3], "off": 5, "cb": "#E2231A", "cn": "#1A1A1A", "cs": "#1A1A1A", "s1w": 3, "sw": 1, "sp": 19, "mll": 1, "honor": "S1 Best CPU", "team": "Haas Factory Team", "mfr": "Ford"}, {"car": "77", "name": "Carson Hocevar", "status": "CPU", "r": [39, 1, 24, 37, 24, 38, 21, 41, 29, 49, 2, 11, 13, 27], "fin": [2, 40, 17, 4, 17, 3, 20, 8, 12, 9, 39, 30, 28, 14], "off": 10, "cb": "#FFD200", "cn": "#FFFFFF", "cs": "#111111", "s1w": 2, "sw": 0, "sp": 25, "mll": 0, "team": "Spire Motorsports", "mfr": "Chevy"}, {"car": "12", "name": "Ryan Blaney", "status": "CPU", "r": [22, 26, 34, 73, 21, 4, 16, 34, 16, 38, 13, 10, 6, 47], "fin": [19, 15, 7, 1, 20, 37, 25, 7, 25, 3, 28, 31, 35, 4], "off": 9, "cb": "#E6FF00", "cn": "#111111", "cs": "#111111", "s1w": 0, "sw": 0, "sp": 28, "mll": 0, "team": "Team Penske", "mfr": "Ford"}, {"car": "16", "name": "AJ Allmendinger", "status": "CPU", "r": [8, 79, 18, 32, 11, 26, 39, 2, 25, 28, 34, 3, 11, 2], "fin": [33, 1, 23, 9, 30, 15, 2, 39, 16, 13, 7, 38, 30, 39], "off": 15, "cb": "#FFFFFF", "cn": "#F26A21", "cs": "#F26A21", "s1w": 0, "sw": 1, "sp": 19, "mll": 1, "team": "Kaulig Racing", "mfr": "Chevy"}, {"car": "5", "name": "Kyle Larson", "status": "CPU", "r": [17, 16, 31, 13, 29, 3, 44, 62, 53, 20, 5, 19, 55, 9], "fin": [24, 25, 10, 28, 12, 38, 5, 4, 6, 21, 36, 22, 4, 32], "off": 8, "cb": "#0046AD", "cn": "#FFFFFF", "cs": "#E4002B", "s1w": 0, "sw": 3, "sp": 64, "mll": 1, "team": "Hendrick Motorsports", "mfr": "Chevy"}, {"car": "9", "name": "Chase Elliott", "status": "CPU", "r": [33, 8, 11, 64, 20, 21, 19, 31, 56, 5, 7, 29, 19, 29], "fin": [8, 33, 30, 2, 21, 20, 22, 10, 4, 36, 34, 12, 22, 12], "off": 12, "cb": "#002F6C", "cn": "#FFD200", "cs": "#FFD200", "s1w": 1, "sw": 3, "sp": 39, "mll": 1, "team": "Hendrick Motorsports", "mfr": "Chevy"}, {"car": "35", "name": "Riley Herbst", "status": "CPU", "r": [9, 15, 8, 19, 30, 33, 18, 36, 21, 29, 28, 25, 25, 5], "fin": [32, 26, 33, 22, 11, 8, 23, 5, 20, 12, 13, 16, 16, 36], "off": 19, "cb": "#0E0E0E", "cn": "#84CC16", "cs": "#19B6E8", "s1w": 1, "sw": 0, "sp": 0, "mll": 0, "team": "23XI Racing", "mfr": "Toyota"}, {"car": "48", "name": "Alex Bowman", "status": "CPU", "r": [25, 18, 49, 30, 7, 19, 55, 3, 34, 14, 10, 13, 17, 28], "fin": [16, 23, 2, 11, 34, 22, 1, 38, 7, 27, 31, 28, 24, 13], "off": 14, "cb": "#6A1B9A", "cn": "#FFFFFF", "cs": "#19B6E8", "s1w": 2, "sw": 1, "sp": 10, "mll": 0, "team": "Hendrick Motorsports", "mfr": "Chevy"}, {"car": "24", "name": "William Byron", "status": "CPU", "r": [13, 6, 12, 20, 31, 55, 1, 43, 23, 21, 16, 32, 22, 10], "fin": [28, 35, 29, 21, 10, 1, 40, 6, 18, 20, 25, 9, 19, 31], "off": 17, "cb": "#C8102E", "cn": "#FFD200", "cs": "#FFD200", "s1w": 0, "sw": 0, "sp": 8, "mll": 0, "team": "Hendrick Motorsports", "mfr": "Chevy"}, {"car": "51", "name": "Cody Ware", "status": "CPU", "r": [21, 33, 25, 24, 17, 12, 26, 19, 11, 25, 53, 6, 70, 14], "fin": [20, 8, 16, 17, 24, 29, 15, 22, 30, 16, 2, 35, 1, 27], "off": 11, "cb": "#C8102E", "cn": "#FFFFFF", "cs": "#1A1A1A", "s1w": 1, "sw": 1, "sp": 19, "mll": 2, "team": "Rick Ware Racing", "mfr": "Ford"}, {"car": "22", "name": "Joey Logano", "status": "CPU", "r": [15, 32, 32, 4, 23, 17, 13, 15, 36, 24, 32, 15, 8, 3], "fin": [26, 9, 9, 37, 18, 24, 28, 26, 5, 17, 9, 26, 33, 38], "off": 30, "cb": "#FDB913", "cn": "#ED1C24", "cs": "#ED1C24", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Team Penske", "mfr": "Ford"}, {"car": "21", "name": "Josh Berry", "status": "CPU", "r": [28, 27, 27, 18, 18, 14, 20, 25, 12, 12, 35, 17, 1, 19], "fin": [13, 14, 14, 23, 23, 27, 21, 16, 29, 29, 6, 24, 40, 22], "off": 28, "cb": "#C41230", "cn": "#FFFFFF", "cs": "#FFD200", "s1w": 1, "sw": 0, "sp": 0, "mll": 0, "team": "Wood Brothers Racing", "mfr": "Ford"}, {"car": "10", "name": "Ty Dillon", "status": "CPU", "r": [27, 30, 17, 3, 56, 29, 5, 5, 51, 11, 23, 12, 3, 7], "fin": [14, 11, 24, 38, 2, 12, 36, 36, 3, 30, 18, 29, 38, 34], "off": 23, "cb": "#D2B48C", "cn": "#C8102E", "cs": "#C8102E", "s1w": 0, "sw": 0, "sp": 25, "mll": 1, "team": "Kaulig Racing", "mfr": "Chevy"}, {"car": "38", "name": "Zane Smith", "status": "CPU", "r": [11, 9, 4, 29, 27, 22, 29, 8, 22, 33, 27, 30, 5, 18], "fin": [30, 32, 37, 12, 14, 19, 12, 33, 19, 8, 14, 11, 36, 23], "off": 24, "cb": "#1E40AF", "cn": "#FFFFFF", "cs": "#FFFFFF", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Front Row Motorsports", "mfr": "Ford"}, {"car": "19", "name": "Chase Briscoe", "status": "CPU", "r": [29, 19, 21, 7, 1, 48, 14, 18, 18, 44, 43, 5, 23, 8], "fin": [12, 22, 20, 34, 40, 2, 27, 23, 23, 6, 8, 36, 18, 33], "off": 20, "cb": "#111111", "cn": "#F26A21", "cs": "#F26A21", "s1w": 1, "sw": 1, "sp": 28, "mll": 0, "team": "Joe Gibbs Racing", "mfr": "Toyota"}, {"car": "60", "name": "Ryan Preece", "status": "CPU", "r": [30, 2, 10, 12, 12, 23, 28, 24, 30, 17, 24, 35, 30, 26], "fin": [11, 39, 31, 29, 29, 18, 13, 17, 11, 24, 17, 6, 11, 15], "off": 18, "cb": "#1C5BA0", "cn": "#FFFFFF", "cs": "#F26A21", "s1w": 1, "sw": 0, "sp": 0, "mll": 0, "team": "RFK Racing", "mfr": "Ford"}, {"car": "3", "name": "Austin Dillon", "status": "CPU", "r": [26, 21, 20, 22, 28, 16, 23, 14, 4, 7, 46, 22, 26, 15], "fin": [15, 20, 21, 19, 13, 25, 18, 27, 37, 34, 5, 19, 15, 26], "off": 21, "cb": "#121212", "cn": "#C0C0C0", "cs": "#C0C0C0", "s1w": 0, "sw": 1, "sp": 10, "mll": 0, "team": "Richard Childress Racing", "mfr": "Chevy"}, {"car": "54", "name": "Ty Gibbs", "status": "CPU", "r": [7, 23, 26, 38, 22, 10, 10, 6, 33, 13, 26, 24, 16, 17], "fin": [34, 18, 15, 3, 19, 31, 31, 35, 8, 28, 15, 17, 25, 24], "off": 29, "cb": "#15301F", "cn": "#B5E61D", "cs": "#B5E61D", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Joe Gibbs Racing", "mfr": "Toyota"}, {"car": "42", "name": "John Hunter Nemechek", "status": "CPU", "r": [5, 29, 35, 35, 19, 2, 31, 27, 2, 35, 4, 16, 31, 42], "fin": [36, 12, 6, 6, 22, 39, 10, 14, 39, 14, 37, 25, 10, 9], "off": 16, "cb": "#1F7A3D", "cn": "#FFFFFF", "cs": "#FFFFFF", "s1w": 0, "sw": 0, "sp": 18, "mll": 0, "team": "Legacy Motor Club", "mfr": "Toyota"}, {"car": "2", "name": "Austin Cindric", "status": "CPU", "r": [4, 20, 13, 36, 14, 11, 17, 39, 13, 8, 30, 28, 38, 13], "fin": [37, 21, 28, 5, 27, 30, 24, 2, 28, 33, 11, 13, 3, 28], "off": 22, "cb": "#FFFFFF", "cn": "#111111", "cs": "#111111", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Team Penske", "mfr": "Ford"}, {"car": "23", "name": "Bubba Wallace", "status": "CPU", "r": [24, 13, 29, 10, 60, 9, 12, 12, 8, 47, 15, 4, 10, 21], "fin": [17, 28, 12, 31, 5, 32, 29, 29, 33, 4, 26, 37, 31, 20], "off": 25, "cb": "#7A2FB5", "cn": "#FF5FA2", "cs": "#FF5FA2", "s1w": 2, "sw": 2, "sp": 29, "mll": 1, "team": "23XI Racing", "mfr": "Toyota"}, {"car": "11", "name": "Denny Hamlin", "status": "CPU", "r": [23, 7, 15, 26, 33, 5, 6, 21, 9, 34, 30, 20, 29, 16], "fin": [18, 34, 26, 15, 8, 36, 35, 20, 32, 7, 19, 21, 12, 25], "off": 26, "cb": "#1E40AF", "cn": "#FFFFFF", "cs": "#FF6600", "s1w": 0, "sw": 0, "sp": 8, "mll": 0, "team": "Joe Gibbs Racing", "mfr": "Toyota"}, {"car": "8", "name": "Kyle Busch", "status": "CPU", "r": [34, 24, 6, 6, 9, 41, 4, 16, 10, 39, 6, 37, 34, 77], "fin": [7, 17, 35, 35, 32, 17, 37, 25, 31, 2, 35, 4, 7, 1], "off": 13, "cb": "#1565C0", "cn": "#FFFFFF", "cs": "#FFD200", "s1w": 0, "sw": 1, "sp": 34, "mll": 1, "team": "Richard Childress Racing", "mfr": "Chevy"}, {"car": "71", "name": "Michael McDowell", "status": "CPU", "r": [16, 11, 2, 23, 13, 8, 34, 10, 19, 36, 25, 21, 7, 31], "fin": [25, 30, 39, 18, 28, 33, 7, 31, 22, 5, 16, 20, 34, 10], "off": 33, "cb": "#1C3F94", "cn": "#FFFFFF", "cs": "#19B6E8", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Spire Motorsports", "mfr": "Chevy"}, {"car": "7", "name": "Justin Haley", "status": "CPU", "r": [10, 5, 16, 8, 32, 20, 50, 28, 3, 23, 8, 26, 15, 30], "fin": [31, 36, 25, 33, 9, 21, 9, 13, 38, 18, 33, 15, 26, 11], "off": 27, "cb": "#111111", "cn": "#FFD200", "cs": "#A4D65E", "s1w": 0, "sw": 1, "sp": 18, "mll": 0, "honor": "S1 People's Champ", "team": "Spire Motorsports", "mfr": "Chevy"}, {"car": "43", "name": "Erik Jones", "status": "CPU", "r": [35, 12, 28, 9, 3, 15, 33, 7, 32, 4, 18, 18, 14, 11], "fin": [6, 29, 13, 32, 38, 26, 8, 34, 9, 37, 23, 23, 27, 30], "off": 35, "cb": "#2C6FBB", "cn": "#FFFFFF", "cs": "#E4002B", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Legacy Motor Club", "mfr": "Toyota"}, {"car": "4", "name": "Noah Gragson", "status": "CPU", "r": [2, 36, 9, 2, 6, 27, 27, 29, 14, 6, 46, 14, 9, 6], "fin": [39, 5, 32, 39, 35, 14, 14, 12, 27, 35, 3, 27, 32, 35], "off": 37, "cb": "#D9C56B", "cn": "#111111", "cs": "#F5A623", "s1w": 0, "sw": 0, "sp": 8, "mll": 0, "team": "Front Row Motorsports", "mfr": "Ford"}, {"car": "20", "name": "Christopher Bell", "status": "CPU", "r": [6, 31, 7, 14, 35, 13, 11, 20, 28, 29, 20, 2, 28, 20], "fin": [35, 10, 34, 27, 6, 28, 30, 21, 13, 22, 21, 39, 13, 21], "off": 31, "cb": "#F2A900", "cn": "#1A1A1A", "cs": "#111111", "s1w": 2, "sw": 1, "sp": 10, "mll": 0, "team": "Joe Gibbs Racing", "mfr": "Toyota"}, {"car": "88", "name": "Shane van Gisbergen", "status": "CPU", "r": [20, 22, 5, 36, 52, 28, 7, 13, 15, 2, 19, 8, 2, 4], "fin": [21, 19, 36, 13, 7, 13, 34, 28, 26, 39, 22, 33, 39, 37], "off": 36, "cb": "#FFFFFF", "cn": "#C8102E", "cs": "#E4002B", "s1w": 1, "sw": 1, "sp": 26, "mll": 0, "team": "Trackhouse Racing", "mfr": "Chevy"}, {"car": "45", "name": "Tyler Reddick", "status": "CPU", "r": [18, 14, 19, 5, 15, 36, 8, 32, 6, 16, 14, 9, 21, 42], "fin": [23, 27, 22, 36, 26, 5, 33, 9, 35, 25, 27, 32, 20, 7], "off": 34, "cb": "#16A6A6", "cn": "#111111", "cs": "#111111", "s1w": 3, "sw": 0, "sp": 8, "mll": 0, "team": "23XI Racing", "mfr": "Toyota"}, {"car": "47", "name": "Ricky Stenhouse Jr.", "status": "CPU", "r": [3, 4, 14, 11, 26, 6, 25, 9, 20, 3, 64, 7, 4, 35], "fin": [38, 37, 27, 30, 15, 35, 16, 32, 21, 38, 1, 34, 37, 6], "off": 38, "cb": "#C8102E", "cn": "#111111", "cs": "#1A1A1A", "s1w": 0, "sw": 0, "sp": 9, "mll": 0, "team": "Hyak Motorsports", "mfr": "Chevy"}, {"car": "99", "name": "Daniel Suarez", "status": "CPU", "r": [19, 3, 3, 15, 5, 55, 2, 23, 24, 10, 12, 27, 18, 48], "fin": [22, 38, 38, 26, 36, 11, 39, 18, 17, 31, 29, 14, 23, 2], "off": 32, "cb": "#0E4DA4", "cn": "#2ECC71", "cs": "#00339A", "s1w": 1, "sw": 2, "sp": 29, "mll": 1, "team": "Trackhouse Racing", "mfr": "Chevy"}, {"car": "13", "name": "Byron Ross", "status": "Human", "r": [1, 17, 1, 1, 2, 1, 30, 1, 1, 1, 1, 1, 24, 1], "fin": [40, 24, 40, 40, 39, 40, 11, 40, 40, 40, 40, 40, 17, 40], "off": 39, "cb": "#F26A21", "cn": "#FFFFFF", "cs": "#FFFFFF", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Trips B Racing", "mfr": "Chevy"}, {"car": "50", "name": "Burt Myers", "status": "CPU", "r": [0, 0, 0, 0, 0, 31, 0, 26, 0, 0, 0, 0, 0, 0], "fin": [0, 0, 0, 0, 0, 10, 0, 15, 0, 0, 0, 0, 0, 0], "off": 40, "cb": "#2C3E50", "cn": "#FFFFFF", "cs": "#FFFFFF", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Team AmeriVet", "mfr": "Chevy"}, {"car": "84", "name": "Jimmie Johnson", "status": "CPU", "r": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 38, 0, 0], "fin": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0], "off": 41, "cb": "#2FA8DF", "cn": "#FFFFFF", "cs": "#FFFFFF", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Legacy Motor Club", "mfr": "Toyota"}, {"car": "78", "name": "BJ McLeod", "status": "CPU", "r": [0, 0, 0, 0, 10, 0, 0, 0, 0, 26, 0, 0, 0, 0], "fin": [0, 0, 0, 0, 31, 0, 0, 0, 0, 15, 0, 0, 0, 0], "off": 42, "cb": "#111111", "cn": "#39FF14", "cs": "#39FF14", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Live Fast Motorsports", "mfr": "Chevy"}, {"car": "66", "name": "Josh Bilicki", "status": "CPU", "r": [0, 25, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0], "fin": [0, 16, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0], "off": 43, "cb": "#FFFFFF", "cn": "#111111", "cs": "#888888", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "MBM Motorsports", "mfr": "Chevy"}, {"car": "44", "name": "JJ Yeley", "status": "CPU", "r": [0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "fin": [0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "off": 44, "cb": "#E91E8C", "cn": "#FFFFFF", "cs": "#888888", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "NY Racing Team", "mfr": "Chevy"}, {"car": "01", "name": "Corey LaJoie", "status": "CPU", "r": [0, 0, 0, 0, 0, 0, 0, 0, 26, 0, 3, 0, 0, 0], "fin": [0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 38, 0, 0, 0], "off": 45, "cb": "#C8102E", "cn": "#FFFFFF", "cs": "#1A1A1A", "s1w": 1, "sw": 0, "sp": 0, "mll": 0, "team": "Rick Ware Racing", "mfr": "Ford"}, {"car": "40", "name": "Justin Allgaier", "status": "CPU", "r": [0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "fin": [0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "off": 46, "cb": "#D2B48C", "cn": "#E8431F", "cs": "#E8431F", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "JR Motorsports", "mfr": "Chevy"}, {"car": "87", "name": "Connor Zilisch", "status": "CPU", "r": [14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0], "fin": [27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 0], "off": 47, "cb": "#0A1F44", "cn": "#FFFFFF", "cs": "#DB0A40", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Trackhouse Racing", "mfr": "Chevy"}, {"car": "56", "name": "Martin Truex Jr.", "status": "CPU", "r": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22], "fin": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19], "off": 48, "cb": "#1B3A6B", "cn": "#C9A84C", "cs": "#C9A84C", "s1w": 0, "sw": 0, "sp": 0, "mll": 0, "team": "Gaunt Brothers Racing", "mfr": "Toyota"}];
+const BY_CAR = Object.fromEntries(DRIVERS.map(d => [d.car, d]));
+const CHASE_FIELD = 12;
+const TOWER_PREVIEW = 16;
+const ROW_H = 58;
+const BG = "#0a0d12";
+const MFR = { Chevy:{bg:"#D4A017",fg:"#10131a"}, Ford:{bg:"#1665C0",fg:"#ffffff"}, Toyota:{bg:"#EB0A1E",fg:"#ffffff"} };
+function MfrTag({ mfr, big }) {
+  const c = MFR[mfr] || { bg:"#444", fg:"#fff" };
+  return <span style={{ fontSize:big?10:9, fontWeight:900, letterSpacing:0.5, padding:big?"2px 7px":"1px 5px", borderRadius:4, background:c.bg, color:c.fg, flexShrink:0 }}>{mfr.toUpperCase()}</span>;
+}
+
+function standingsAfter(ri) {
+  const rows = DRIVERS.map(d => {
+    let pts = 0, wins = 0, started = false;
+    for (let i = 0; i <= ri; i++) {
+      pts += d.r[i];
+      if (d.r[i] > 0) started = true;
+      if (WINNERS[i] === d.car) wins++;
+    }
+    return { ...d, pts, wins, started, gained: d.r[ri] };
+  });
+  rows.sort((a, b) => b.pts - a.pts || b.wins - a.wins || a.off - b.off);
+  rows.forEach((row, i) => (row.rank = i + 1));
+  return rows;
+}
+const HISTORY = Array.from({ length: WINNERS.length }, (_, i) => {
+  const s = standingsAfter(i), m = {};
+  s.forEach(d => (m[d.car] = { rank: d.rank, pts: d.pts, started: d.started }));
+  return m;
+});
+function seasonWins(car) { return WINNERS.filter(w => w === car).length; }
+function profileFor(car) {
+  const d = BY_CAR[car];
+  const f = d.fin.map((x, i) => ({ race: i + 1, fin: x, pts: d.r[i] })).filter(x => x.fin > 0);
+  const fins = f.map(x => x.fin);
+  const s2w = seasonWins(car);
+  const final = HISTORY[WINNERS.length - 1][car];
+  return {
+    d, log: f, starts: f.length,
+    avg: fins.length ? (fins.reduce((a, b) => a + b, 0) / fins.length) : null,
+    best: fins.length ? Math.min(...fins) : null,
+    worst: fins.length ? Math.max(...fins) : null,
+    t5: fins.filter(x => x <= 5).length,
+    t10: fins.filter(x => x <= 10).length,
+    s2w, careerW: d.s1w + s2w, s1w: d.s1w,
+    pts: final.pts, rank: final.rank,
+  };
+}
+function lum(hex) {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0,2),16)/255, g = parseInt(h.slice(2,4),16)/255, b = parseInt(h.slice(4,6),16)/255;
+  return 0.2126*r + 0.7152*g + 0.0722*b;
+}
+const lineColor = d => (lum(d.cb) > 0.16 ? d.cb : d.cn);
+
+function Arrow({ delta }) {
+  if (delta === null) return <span style={{ color:"#5b6472", fontSize:11, fontWeight:700 }}>NEW</span>;
+  if (delta === 0) return <span style={{ color:"#5b6472" }}>—</span>;
+  const up = delta > 0;
+  return <span style={{ color: up?"#22c55e":"#ef4444", display:"inline-flex", alignItems:"center", gap:1, fontWeight:800, fontSize:12, fontVariantNumeric:"tabular-nums" }}><span style={{ fontSize:9, lineHeight:1 }}>{up?"▲":"▼"}</span>{Math.abs(delta)}</span>;
+}
+// Per-car number decals matched to in-game art. fill = vertical gradient stops; outline = stroke color or null; plate = "white" | "dark".
+// Add a car here as its number photo comes in. Cars without an entry use the default flat color chip.
+const NUMSTYLE = {
+  "27": { fill:["#2EC25E","#0E9A45","#00742F"], outline:null,      plate:"white" }, // Quaker State green, no outline
+  "6":  { fill:["#3FE0CF","#16B86A","#0A8C3C"], outline:"#FFFFFF", plate:"dark"  }, // teal->green, white outline
+  "43": { fill:["#8AD0F4","#4FB0E8","#2F92D6"], outline:"#F2E9CF", plate:"dark"  }, // Petty light blue, cream outline
+};
+function NumberChip({ d, size = 42 }) {
+  const fs = d.car.length > 2 ? size * 0.36 : size * 0.46;
+  const ns = NUMSTYLE[d.car];
+  if (ns) {
+    const white = ns.plate === "white";
+    return (
+      <div style={{ width:size, height:size, borderRadius:8, background: white ? "linear-gradient(180deg,#ffffff,#e7ebee)" : "radial-gradient(circle at 50% 38%, #232830, #111419)", display:"flex", alignItems:"center", justifyContent:"center", border: white ? "1px solid rgba(0,0,0,0.18)" : "1px solid rgba(255,255,255,0.14)", boxShadow: white ? "inset 0 -3px 6px rgba(0,0,0,0.16)" : "inset 0 -3px 6px rgba(0,0,0,0.45)", flexShrink:0 }}>
+        <span style={{ fontWeight:900, fontStyle:"italic", fontSize:fs*1.08, letterSpacing:-1.5, lineHeight:1, background:`linear-gradient(180deg, ${ns.fill[0]} 0%, ${ns.fill[1]} 48%, ${ns.fill[2]} 100%)`, WebkitBackgroundClip:"text", backgroundClip:"text", color:"transparent", WebkitTextStroke: ns.outline ? `${Math.max(0.6, size*0.025)}px ${ns.outline}` : undefined, filter:"drop-shadow(0 1px 1px rgba(0,0,0,0.4))", fontVariantNumeric:"tabular-nums", fontFamily:"'Arial Narrow','Roboto Condensed',system-ui,sans-serif" }}>{d.car}</span>
+      </div>
+    );
+  }
+  return <div style={{ width:size, height:size, borderRadius:8, background:d.cb, color:d.cn, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:900, fontStyle:"italic", fontSize:fs, letterSpacing:-1, border:"1px solid rgba(255,255,255,0.18)", boxShadow:"inset 0 -3px 6px rgba(0,0,0,0.35)", flexShrink:0, fontVariantNumeric:"tabular-nums" }}>{d.car}</div>;
+}
+
+
+function App() {
+  const [tab, setTab] = useState("tower");
+  const [sel, setSel] = useState(null);
+  return (
+    <div style={{ background:BG, minHeight:"100vh", color:"#e9edf2", fontFamily:"'Arial Narrow','Roboto Condensed',system-ui,sans-serif", paddingBottom:40 }}>
+      <div style={{ height:8, background:"repeating-linear-gradient(90deg,#fff 0 14px,#111 14px 28px)" }} />
+      <div style={{ maxWidth:760, margin:"0 auto", padding:"0 12px" }}>
+        <div style={{ paddingTop:16, paddingBottom:10 }}>
+          <div style={{ fontSize:11, letterSpacing:3, color:"#f7c948", fontWeight:800 }}>NASCAR&nbsp;25&nbsp;&middot;&nbsp;FRANCHISE&nbsp;SEASON&nbsp;2</div>
+          <div style={{ fontSize:30, fontWeight:900, fontStyle:"italic", letterSpacing:-1, lineHeight:1.05, textTransform:"uppercase" }}>Points Standings</div>
+        </div>
+        <div style={{ display:"flex", gap:5, marginBottom:10 }}>
+          {[["tower","Tower"],["chase","Chase"],["stage","Stage Pts"],["move","Leaders"]].map(([k,label]) => (
+            <button key={k} onClick={() => setTab(k)} style={{ flex:1, padding:"9px 3px", borderRadius:9, cursor:"pointer", border:`1px solid ${tab===k?"#f7c948":"#1e2630"}`, background:tab===k?"#f7c948":"#11161e", color:tab===k?"#0a0d12":"#cdd4dd", fontWeight:900, letterSpacing:0.2, fontSize:11, textTransform:"uppercase" }}>{label}</button>
+          ))}
+        </div>
+        {tab === "tower" && <Tower onSelect={setSel} />}
+        {tab === "chase" && <ChaseTracker onSelect={setSel} />}
+        {tab === "stage" && <StagePoints onSelect={setSel} />}
+        {tab === "move" && <Insights onSelect={setSel} />}
+      </div>
+      {sel && <DriverDetail car={sel} onClose={() => setSel(null)} />}
+    </div>
+  );
+}
+
+function Tower({ onSelect }) {
+  const [ri, setRi] = useState(WINNERS.length - 1);
+  const [expanded, setExpanded] = useState(false);
+  const reduce = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cur = useMemo(() => standingsAfter(ri), [ri]);
+  const prevRank = useMemo(() => {
+    if (ri === 0) return {};
+    const m = {};
+    Object.entries(HISTORY[ri-1]).forEach(([car,v]) => (m[car] = v.started ? v.rank : null));
+    return m;
+  }, [ri]);
+  const leader = cur[0];
+  const winner = cur.find(d => d.car === WINNERS[ri]);
+  let mover=null, faller=null;
+  if (ri>0) cur.forEach(d => {
+    const p = prevRank[d.car];
+    if (!d.started || p==null) return;
+    const delta = p - d.rank;
+    if (!mover || delta>mover.delta) mover={d,delta};
+    if (!faller || delta<faller.delta) faller={d,delta};
+  });
+  const started = cur.filter(d => d.started);
+  const shown = expanded ? started.length : Math.min(TOWER_PREVIEW, started.length);
+  const towerH = shown * ROW_H;
+
+  return (
+    <>
+      <div style={{ background:"#11161e", border:"1px solid #1e2630", borderRadius:12, padding:"12px 14px" }}>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:10 }}>
+          <button onClick={()=>setRi(Math.max(0,ri-1))} disabled={ri===0} style={btn(ri===0)}>◀</button>
+          <div style={{ textAlign:"center", flex:1 }}>
+            <div style={{ fontSize:10, letterSpacing:2, color:"#8b94a3", fontWeight:700 }}>STANDINGS THROUGH</div>
+            <div style={{ fontSize:19, fontWeight:900, fontStyle:"italic", letterSpacing:-0.5 }}>RACE {ri+1} <span style={{ color:"#f7c948" }}>· {TRACKS[ri].toUpperCase()}</span></div>
+          </div>
+          <button onClick={()=>setRi(Math.min(WINNERS.length-1,ri+1))} disabled={ri===WINNERS.length-1} style={btn(ri===11)}>▶</button>
+        </div>
+        <input type="range" min={0} max={WINNERS.length-1} value={ri} onChange={e=>setRi(Number(e.target.value))} style={{ width:"100%", marginTop:12, accentColor:"#f7c948", cursor:"pointer" }} />
+        <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#5b6472", marginTop:2 }}><span>R1</span><span>R{Math.ceil(WINNERS.length/2)}</span><span>R{WINNERS.length}</span></div>
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:8, marginTop:10 }}>
+        <StatCard label="POINTS LEADER" d={leader} sub={`${leader.pts} pts`} onSelect={onSelect} />
+        <StatCard label={`RACE ${ri+1} WINNER`} d={winner} sub={TRACKS[ri]} onSelect={onSelect} />
+        {mover && mover.delta>0 ? <StatCard label="BIGGEST MOVER" d={mover.d} sub={`▲ ${mover.delta} to P${mover.d.rank}`} accent="#22c55e" onSelect={onSelect} /> : <StatCard label="BIGGEST MOVER" placeholder sub="Season opener" />}
+        {faller && faller.delta<0 ? <StatCard label="BIGGEST FALLER" d={faller.d} sub={`▼ ${Math.abs(faller.delta)} to P${faller.d.rank}`} accent="#ef4444" onSelect={onSelect} /> : <StatCard label="BIGGEST FALLER" placeholder sub="Season opener" />}
+      </div>
+
+      <div style={{ display:"flex", alignItems:"center", gap:8, padding:"14px 10px 6px", fontSize:10, letterSpacing:1.5, color:"#6b7484", fontWeight:800 }}>
+        <span style={{ width:26 }}>POS</span><span style={{ width:34 }}>+/−</span><span style={{ width:42 }}>CAR</span><span style={{ flex:1 }}>DRIVER</span><span style={{ width:56, textAlign:"right" }}>PTS</span><span style={{ width:52, textAlign:"right" }}>GAP</span>
+      </div>
+
+      <div style={{ position:"relative", height:towerH, overflow:"hidden", transition:reduce?"none":"height 400ms ease" }}>
+        {cur.map(d => {
+          if (!d.started) return null;
+          const pr = prevRank[d.car];
+          const delta = ri===0 ? null : (pr==null ? null : pr - d.rank);
+          const isHuman = d.status === "Human";
+          const gap = leader.pts - d.pts;
+          const hidden = d.rank > shown;
+          return (
+            <div key={d.car} onClick={()=>onSelect(d.car)} style={{ position:"absolute", left:0, right:0, top:0, transform:`translateY(${(d.rank-1)*ROW_H}px)`, transition:reduce?"none":"transform 620ms cubic-bezier(.22,.61,.36,1), opacity 300ms", height:ROW_H, padding:"0 2px", opacity:hidden?0:1, pointerEvents:hidden?"none":"auto", cursor:"pointer" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:8, height:ROW_H-6, background:isHuman?"linear-gradient(90deg,#1a2433,#11161e)":"#11161e", border:`1px solid ${isHuman?"#f7c94855":"#1c242f"}`, borderLeft:`4px solid ${d.cb}`, borderRadius:9, padding:"0 10px", position:"relative", overflow:"hidden" }}>
+                {d.rank<=CHASE_FIELD && <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3, background:"#22c55e" }} />}
+                <div style={{ width:26, fontWeight:900, fontStyle:"italic", fontSize:18, textAlign:"center", color:d.rank===1?"#f7c948":"#dfe5ec", fontVariantNumeric:"tabular-nums" }}>{d.rank}</div>
+                <div style={{ width:34, textAlign:"center" }}><Arrow delta={delta} /></div>
+                <NumberChip d={d} />
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                    <span style={{ fontWeight:800, fontSize:15, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{d.name}</span>
+                    {isHuman && <span style={{ fontSize:8, fontWeight:900, color:"#0a0d12", background:"#f7c948", borderRadius:3, padding:"1px 4px", letterSpacing:0.5 }}>YOU</span>}
+                  </div>
+                  <div style={{ fontSize:10, color:"#7b8493", fontWeight:600, display:"flex", gap:5, alignItems:"center", minWidth:0 }}>
+                    <MfrTag mfr={d.mfr} />
+                    <span style={{ flex:1, minWidth:0, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{d.team}</span>
+                    {d.wins>0 && <span style={{ color:"#f7c948", flexShrink:0 }}>★{d.wins}</span>}
+                    <span style={{ color:"#22c55e", fontWeight:800, background:"#0f2417", borderRadius:3, padding:"0 4px", flexShrink:0 }}>+{d.gained}</span>
+                  </div>
+                </div>
+                <div style={{ width:56, textAlign:"right", fontWeight:900, fontSize:17, fontVariantNumeric:"tabular-nums" }}>{d.pts}</div>
+                <div style={{ width:52, textAlign:"right", fontSize:12, color:"#8b94a3", fontVariantNumeric:"tabular-nums" }}>{d.rank===1?"LEADER":`-${gap}`}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <button onClick={()=>setExpanded(x=>!x)} style={{ width:"100%", marginTop:10, padding:"12px", borderRadius:10, cursor:"pointer", border:`1px solid ${expanded?"#2a333f":"#22c55e55"}`, background:expanded?"#11161e":"#0f2417", color:expanded?"#cdd4dd":"#5fe08a", fontWeight:900, fontStyle:"italic", letterSpacing:0.5, fontSize:13, textTransform:"uppercase" }}>
+        {expanded ? "▴ Show top 16" : `▾ Show full field (${started.length} cars)`}
+      </button>
+
+      <div style={{ display:"flex", flexWrap:"wrap", gap:14, fontSize:10, color:"#6b7484", padding:"14px 6px 0", fontWeight:600 }}>
+        <span><span style={{ color:"#22c55e" }}>▲</span>/<span style={{ color:"#ef4444" }}>▼</span> move vs. previous race</span>
+        <span><span style={{ color:"#22c55e" }}>▮</span> top {CHASE_FIELD} = Chase field</span>
+        <span><span style={{ color:"#f7c948" }}>★</span> wins · tap a row for full history</span>
+      </div>
+    </>
+  );
+}
+
+function top10Streak(d) {
+  let s = 0;
+  for (let i = 11; i >= 0; i--) { const f = d.fin[i]; if (f > 0 && f <= 10) s++; else break; }
+  return s;
+}
+function LeaderCard({ title, sub, rows, onSelect, fmt }) {
+  return (
+    <div style={{ background:"#11161e", border:"1px solid #1e2630", borderRadius:12, padding:"11px 13px", marginBottom:9 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline" }}>
+        <div style={{ fontSize:12, fontWeight:900, fontStyle:"italic", textTransform:"uppercase", letterSpacing:0.4 }}>{title}</div>
+        {sub && <div style={{ fontSize:9, color:"#6b7484" }}>{sub}</div>}
+      </div>
+      <div style={{ display:"flex", flexDirection:"column", gap:6, marginTop:8 }}>
+        {rows.map((r, i) => (
+          <div key={r.d.car} onClick={() => onSelect(r.d.car)} style={{ display:"flex", alignItems:"center", gap:8, cursor:"pointer" }}>
+            <span style={{ width:14, fontSize:11, fontWeight:900, color: i === 0 ? "#f7c948" : "#5b6472", fontStyle:"italic" }}>{i + 1}</span>
+            <NumberChip d={r.d} size={i === 0 ? 30 : 24} />
+            <span style={{ flex:1, fontSize: i === 0 ? 13 : 11, fontWeight: i === 0 ? 800 : 600, color: i === 0 ? "#e9edf2" : "#9aa2af", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>
+              {r.d.name}{r.d.status === "Human" && <span style={{ fontSize:7, fontWeight:900, color:"#0a0d12", background:"#f7c948", borderRadius:3, padding:"1px 3px", marginLeft:5 }}>YOU</span>}
+            </span>
+            <span style={{ fontWeight:900, fontSize: i === 0 ? 16 : 12, fontVariantNumeric:"tabular-nums", color: i === 0 ? "#f7c948" : "#cdd4dd" }}>{fmt ? fmt(r.value) : r.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+function Leaders({ onSelect }) {
+  const rows = standingsAfter(WINNERS.length - 1).filter(d => d.started);
+  const profiles = rows.map(d => ({ d, p: profileFor(d.car) }));
+  const top = (sel, asc = false, n = 3) => {
+    const arr = profiles.map(({ d, p }) => ({ d, value: sel(d, p) })).filter(x => x.value !== null && x.value !== undefined);
+    arr.sort((a, b) => asc ? a.value - b.value : b.value - a.value);
+    return arr.slice(0, n);
+  };
+  return (
+    <div>
+      <div style={{ background:"#11161e", border:"1px solid #1e2630", borderRadius:12, padding:"12px 14px", marginBottom:10 }}>
+        <div style={{ fontSize:14, fontWeight:900, fontStyle:"italic", textTransform:"uppercase", letterSpacing:0.5 }}>League Leaders</div>
+        <div style={{ fontSize:11, color:"#8b94a3", marginTop:5, lineHeight:1.5 }}>Through Race 14 · Tap any name for the full driver page.</div>
+      </div>
+      <LeaderCard title="Wins" rows={top((d, p) => p.s2w)} onSelect={onSelect} />
+      <LeaderCard title="Stage Points" sub="10-9-8 scheme" rows={top(d => d.sp)} onSelect={onSelect} />
+      <LeaderCard title="Most Laps Led Awards" rows={top(d => d.mll)} onSelect={onSelect} />
+      <LeaderCard title="Top 5 Finishes" rows={top((d, p) => p.t5)} onSelect={onSelect} />
+      <LeaderCard title="Top 10 Finishes" rows={top((d, p) => p.t10)} onSelect={onSelect} />
+      <LeaderCard title="Best Average Finish" sub="lowest wins" rows={top((d, p) => p.avg, true)} onSelect={onSelect} fmt={v => v.toFixed(2)} />
+      <LeaderCard title="Current Top-10 Streak" sub="active heading into R13" rows={top(d => top10Streak(d))} onSelect={onSelect} fmt={v => `${v} races`} />
+    </div>
+  );
+}
+function Insights({ onSelect }) {
+  return <Leaders onSelect={onSelect} />;
+}
+
+function ChaseTracker({ onSelect }) {
+  const s = standingsAfter(WINNERS.length - 1).filter(d => d.started);
+  const SEED = [75, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10];
+  const inField = s.slice(0, CHASE_FIELD);
+  const nonChase = s.slice(CHASE_FIELD);
+  const cutPts = inField.length ? inField[inField.length - 1].pts : 0;
+  const peoplesPts = nonChase.length ? nonChase[0].pts : 0;
+
+  const form = (d) => {
+    const f = d.fin.filter(x => x > 0);
+    const last = f.slice(-4);
+    const r = last.reduce((a, b) => a + b, 0) / last.length;
+    const sz = f.reduce((a, b) => a + b, 0) / f.length;
+    const diff = sz - r;
+    if (diff >= 3) return { t: "▲ HOT", c: "#22c55e" };
+    if (diff <= -3) return { t: "▼ COOL", c: "#ef4444" };
+    return { t: "STEADY", c: "#8b94a3" };
+  };
+
+  return (
+    <>
+      <div style={{ background:"#11161e", border:"1px solid #1e2630", borderRadius:12, padding:"12px 14px", marginBottom:10 }}>
+        <div style={{ fontSize:14, fontWeight:900, fontStyle:"italic", textTransform:"uppercase", letterSpacing:0.5 }}>Chase / Playoff Tracker</div>
+        <div style={{ fontSize:11, color:"#8b94a3", marginTop:5, lineHeight:1.55 }}>Top <b style={{color:"#cdd4dd"}}>12 on points</b> at Race 26 make the 10-race Chase (R27–36) — no win-and-in, no eliminations. At the cut, points <b style={{color:"#cdd4dd"}}>reset by seed</b> (75 / 60 / 55 / 50 / 45 / 40 / 35 / 30 / 25 / 20 / 15 / 10), then most points after Atlanta is champion. <b style={{color:"#f7c948"}}>Projection through Race 14.</b></div>
+      </div>
+
+      <SectionLabel>Projected Chase seeding — reset points</SectionLabel>
+      <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+        {inField.map((d, i) => {
+          const fm = form(d);
+          const bubble = i === inField.length - 1;
+          return (
+            <div key={d.car} onClick={() => onSelect(d.car)} style={{ display:"flex", alignItems:"center", gap:9, padding:"7px 10px", background: d.status==="Human"?"linear-gradient(90deg,#1a2433,#11161e)":"#11161e", border:`1px solid ${d.status==="Human"?"#f7c94855":"#1c242f"}`, borderLeft:`4px solid ${d.cb}`, borderRadius:9, cursor:"pointer" }}>
+              <span style={{ width:18, fontWeight:900, fontStyle:"italic", fontSize:15, textAlign:"center", color: i===0?"#f7c948":"#8b94a3" }}>{i + 1}</span>
+              <NumberChip d={d} size={32} />
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontWeight:800, fontSize:14, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{d.name}{d.status==="Human" && <span style={{ fontSize:8, fontWeight:900, color:"#0a0d12", background:"#f7c948", borderRadius:3, padding:"1px 4px", marginLeft:6 }}>YOU</span>}</div>
+                <div style={{ fontSize:10, fontWeight:700, marginTop:1, display:"flex", gap:6, alignItems:"center" }}>
+                  <span style={{ color:fm.c }}>{fm.t}</span>
+                  <span style={{ color:"#7b8493" }}>{d.pts} pts{bubble ? " · BUBBLE" : ""}</span>
+                </div>
+              </div>
+              <div style={{ textAlign:"right", flexShrink:0 }}>
+                <div style={{ fontWeight:900, fontSize:19, color:"#f7c948", fontVariantNumeric:"tabular-nums", lineHeight:1 }}>{SEED[i]}</div>
+                <div style={{ fontSize:8, color:"#6b7484", fontWeight:700, letterSpacing:0.5 }}>RESET</div>
+              </div>
+            </div>
+          );
+        })}
+        <div style={{ display:"flex", alignItems:"center", gap:8, margin:"2px 0" }}>
+          <div style={{ flex:1, borderBottom:"2px dashed #ef4444" }} />
+          <span style={{ fontSize:9, fontWeight:900, color:"#ef4444", letterSpacing:1, whiteSpace:"nowrap" }}>CUT LINE · {cutPts} PTS</span>
+          <div style={{ flex:1, borderBottom:"2px dashed #ef4444" }} />
+        </div>
+      </div>
+
+      <SectionLabel>The People&apos;s Champ — best of the rest (P13+)</SectionLabel>
+      <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+        {nonChase.slice(0, 8).map((d, i) => (
+          <div key={d.car} onClick={() => onSelect(d.car)} style={{ display:"flex", alignItems:"center", gap:9, padding:"7px 10px", background: i===0?"linear-gradient(90deg,#2a230c,#11161e)":(d.status==="Human"?"linear-gradient(90deg,#1a2433,#11161e)":"#11161e"), border:`1px solid ${i===0?"#f7c948":"#1c242f"}`, borderLeft:`4px solid ${d.cb}`, borderRadius:9, cursor:"pointer" }}>
+            <span style={{ width:24, fontWeight:900, fontStyle:"italic", fontSize:14, textAlign:"center", color:"#8b94a3" }}>{CHASE_FIELD + 1 + i}</span>
+            <NumberChip d={d} size={32} />
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontWeight:800, fontSize:14, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{d.name}{d.status==="Human" && <span style={{ fontSize:8, fontWeight:900, color:"#0a0d12", background:"#f7c948", borderRadius:3, padding:"1px 4px", marginLeft:6 }}>YOU</span>}</div>
+              <div style={{ fontSize:10, color:"#7b8493", fontWeight:600 }}>{d.pts} pts{i>0 ? ` · ${peoplesPts - d.pts} back` : ""} · {cutPts - d.pts} from Chase</div>
+            </div>
+            {i === 0
+              ? <span style={{ fontSize:9, fontWeight:900, color:"#0a0d12", background:"#f7c948", borderRadius:4, padding:"3px 7px", letterSpacing:0.5, flexShrink:0 }}>PEOPLE&apos;S CHAMP</span>
+              : <span style={{ fontSize:14, fontWeight:900, fontVariantNumeric:"tabular-nums", flexShrink:0 }}>{d.pts}</span>}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ fontSize:10, color:"#5b6472", padding:"12px 6px 0", lineHeight:1.55 }}>Reset/Chase activates at Race 27 — this is a projection off the current 12 races. Three crowns tracked: the <b style={{color:"#8b94a3"}}>reset Chase champion</b> (here), the <b style={{color:"#8b94a3"}}>full-season points champion</b> with no reset (the main Tower), and the <b style={{color:"#f7c948"}}>People&apos;s Champ</b> for the best car outside the 12.</div>
+    </>
+  );
+}
+
+// Championship-rank movement caused by the 4-3-2 -> 10-9-8 stage re-score (through R12).
+// [car, deltaSpots, oldRank, newRank]
+const MOVERS = {
+  up:   [["88",4,35,31],["19",3,21,18],["23",3,27,24],["5",2,11,9],["10",2,19,17]],
+  down: [["43",-3,32,35],["35",-2,14,16],["22",-2,17,19],["21",-2,18,20],["54",-2,24,26]],
+};
+function StagePoints({ onSelect }) {
+  const ranked = standingsAfter(WINNERS.length - 1).filter(d => d.started).sort((a, b) => b.sp - a.sp || b.sw - a.sw || a.off - b.off);
+  const max = Math.max(1, ranked[0].sp);
+  return (
+    <>
+      <div style={{ background:"#11161e", border:"1px solid #1e2630", borderRadius:12, padding:"12px 14px", marginBottom:10 }}>
+        <div style={{ fontSize:14, fontWeight:900, fontStyle:"italic", textTransform:"uppercase", letterSpacing:0.5 }}>Stage Points Standings</div>
+        <div style={{ fontSize:11, color:"#8b94a3", marginTop:5, lineHeight:1.55 }}>Stage points only — <b style={{color:"#cdd4dd"}}>10-9-8</b> scheme (top 3 each stage), applied to all races. Your <b style={{color:"#cdd4dd"}}>#15</b> and <b style={{color:"#cdd4dd"}}>#27</b> bank none by league rule, so they sit on the floor.</div>
+      </div>
+      <div style={{ background:"#11161e", border:"1px solid #1e2630", borderRadius:12, padding:"11px 13px", marginBottom:10 }}>
+        <div style={{ fontSize:11, fontWeight:900, fontStyle:"italic", textTransform:"uppercase", letterSpacing:0.5, color:"#cdd4dd" }}>10-9-8 Rule-Change Impact</div>
+        <div style={{ fontSize:10, color:"#7b8493", margin:"3px 0 8px" }}>Championship-rank shift vs the old 4-3-2 scheme, through Race 12.</div>
+        {[["\u25B2 Climbed","#34d058",MOVERS.up],["\u25BC Slid","#ef5b5b",MOVERS.down]].map(([label,clr,list]) => (
+          <div key={label} style={{ display:"flex", alignItems:"flex-start", gap:8, marginTop:7 }}>
+            <span style={{ width:58, fontSize:10, fontWeight:800, color:clr, flexShrink:0, paddingTop:6 }}>{label}</span>
+            <div style={{ display:"flex", gap:7, flexWrap:"wrap" }}>
+              {list.map(([c,delta,o,n]) => { const dd = DRIVERS.find(x => x.car === c); return (
+                <div key={c} onClick={() => onSelect(c)} style={{ display:"flex", alignItems:"center", gap:5, background:"#0c1118", border:"1px solid #1c242f", borderRadius:7, padding:"3px 7px 3px 3px", cursor:"pointer" }}>
+                  <NumberChip d={dd} size={24} />
+                  <span style={{ fontSize:11, fontWeight:800, color:clr, fontVariantNumeric:"tabular-nums" }}>{delta > 0 ? `+${delta}` : delta}</span>
+                  <span style={{ fontSize:9, color:"#6b7480" }}>P{o}&rarr;{n}</span>
+                </div>
+              ); })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+        {ranked.map((d, i) => (
+          <div key={d.car} onClick={() => onSelect(d.car)} style={{ display:"flex", alignItems:"center", gap:9, padding:"6px 10px", background: d.status==="Human"?"linear-gradient(90deg,#1a2433,#11161e)":"#11161e", border:`1px solid ${d.status==="Human"?"#f7c94855":"#1c242f"}`, borderLeft:`4px solid ${d.cb}`, borderRadius:9, cursor:"pointer", position:"relative", overflow:"hidden" }}>
+            <div style={{ position:"absolute", left:0, top:0, bottom:0, width:`${(d.sp / max) * 100}%`, background:`${d.cb}22`, pointerEvents:"none" }} />
+            <span style={{ width:22, fontWeight:900, fontStyle:"italic", color: i===0?"#f7c948":"#8b94a3", textAlign:"center", zIndex:1 }}>{i + 1}</span>
+            <NumberChip d={d} size={32} />
+            <div style={{ flex:1, minWidth:0, zIndex:1 }}>
+              <div style={{ fontWeight:800, fontSize:14, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{d.name}{d.status==="Human" && <span style={{ fontSize:8, fontWeight:900, color:"#0a0d12", background:"#f7c948", borderRadius:3, padding:"1px 4px", marginLeft:6 }}>YOU</span>}</div>
+              <div style={{ fontSize:10, color:"#7b8493" }}>{d.sw} stage {d.sw === 1 ? "win" : "wins"}</div>
+            </div>
+            <div style={{ fontWeight:900, fontSize:18, zIndex:1, fontVariantNumeric:"tabular-nums", color: d.sp ? "#e9edf2" : "#5b6472" }}>{d.sp}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize:10, color:"#5b6472", padding:"12px 6px 0" }}>Ranked by stage points; ties broken by stage wins. Tap a driver for full history.</div>
+    </>
+  );
+}
+
+function DriverDetail({ car, onClose }) {
+  const p = profileFor(car);
+  const d = p.d;
+  const trend = useMemo(() => Array.from({ length:WINNERS.length }, (_,i) => {
+    const h = HISTORY[i][car];
+    return { race:`R${i+1}`, rank: h && h.started ? h.rank : null };
+  }), [car]);
+  const maxR = Math.max(2, ...trend.map(t=>t.rank||1));
+  const s1Wins = S1_WINNERS.map((c, i) => (c === car ? { race: i + 1, track: S1_TRACKS[i] } : null)).filter(Boolean);
+  return (
+    <div onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(4,6,10,0.78)", zIndex:50, display:"flex", justifyContent:"center", alignItems:"flex-start", padding:"12px", overflowY:"auto" }}>
+      <div onClick={e=>e.stopPropagation()} style={{ width:"100%", maxWidth:560, background:"#0d1219", border:"1px solid #232c38", borderRadius:16, overflow:"hidden", marginTop:8, marginBottom:24 }}>
+        {/* header */}
+        <div style={{ background:`linear-gradient(125deg, ${d.cb} 0%, ${d.cs} 48%, #0d1219 104%)`, padding:"16px 16px 14px", position:"relative" }}>
+          <button onClick={onClose} style={{ position:"absolute", top:12, right:12, width:30, height:30, borderRadius:8, border:"1px solid rgba(255,255,255,0.25)", background:"rgba(0,0,0,0.3)", color:"#fff", fontWeight:900, cursor:"pointer" }}>✕</button>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <NumberChip d={d} size={58} />
+            <div>
+              <div style={{ fontSize:24, fontWeight:900, fontStyle:"italic", letterSpacing:-0.5, lineHeight:1, textShadow:"0 1px 4px rgba(0,0,0,0.7)" }}>{d.name}</div>
+              <div style={{ display:"flex", gap:6, marginTop:6, flexWrap:"wrap", alignItems:"center" }}>
+                <Tag>#{d.car}</Tag>
+                <MfrTag mfr={d.mfr} big />
+                <Tag>{d.team}</Tag>
+                <Tag>{d.status === "Human" ? "Human driver" : "CPU"}</Tag>
+                {d.honor && <Tag gold>{d.honor}</Tag>}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ padding:"14px 16px 20px", fontFamily:"'Arial Narrow','Roboto Condensed',system-ui,sans-serif", color:"#e9edf2" }}>
+          {/* career wins */}
+          <SectionLabel>Career</SectionLabel>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
+            <BigStat v={p.careerW} l="Career wins" big />
+            <BigStat v={p.s1w} l="Season 1 wins" />
+            <BigStat v={p.s2w} l="Season 2 wins" />
+          </div>
+
+          <SectionLabel>Season 2 — through Race 14</SectionLabel>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8 }}>
+            <BigStat v={`P${p.rank}`} l="Points rank" />
+            <BigStat v={p.pts} l="Points" />
+            <BigStat v={p.avg!=null?p.avg.toFixed(2):"—"} l="Avg finish" />
+            <BigStat v={p.best ?? "—"} l="Best finish" />
+            <BigStat v={p.worst ?? "—"} l="Worst finish" />
+            <BigStat v={p.starts} l="Starts" />
+            <BigStat v={p.t5} l="Top 5s" />
+            <BigStat v={p.t10} l="Top 10s" />
+            <BigStat v={d.sw} l="Stage wins" />
+            <BigStat v={d.sp} l="Stage points" />
+            <BigStat v={d.mll} l="Most-laps-led" />
+            <BigStat v={p.s2w} l="Wins" />
+          </div>
+
+          <SectionLabel>Championship position by race</SectionLabel>
+          <div style={{ height:150, background:"#11161e", border:"1px solid #1c242f", borderRadius:10, padding:"8px 8px 0 0" }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={trend} margin={{ top:6, right:8, bottom:2, left:0 }}>
+                <CartesianGrid stroke="#1b222c" vertical={false} />
+                <XAxis dataKey="race" tick={{ fill:"#7b8493", fontSize:9, fontWeight:700 }} axisLine={{ stroke:"#2a333f" }} tickLine={false} interval={1} />
+                <YAxis reversed domain={[1,maxR]} allowDecimals={false} width={26} tick={{ fill:"#7b8493", fontSize:9, fontWeight:700 }} axisLine={{ stroke:"#2a333f" }} tickLine={false} />
+                <Tooltip contentStyle={{ background:"#11161e", border:"1px solid #2a333f", borderRadius:8, fontSize:11 }} formatter={v=>[`P${v}`,"Position"]} labelStyle={{ color:"#f7c948", fontWeight:800 }} />
+                <Line type="monotone" dataKey="rank" stroke={lineColor(d)} strokeWidth={3} dot={{ r:2.5, strokeWidth:0, fill:lineColor(d) }} connectNulls={false} isAnimationActive={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          <SectionLabel>Race log</SectionLabel>
+          <div style={{ border:"1px solid #1c242f", borderRadius:10, overflow:"hidden" }}>
+            <div style={{ display:"flex", fontSize:10, letterSpacing:1, color:"#6b7484", fontWeight:800, background:"#11161e", padding:"7px 12px" }}>
+              <span style={{ width:34 }}>RACE</span><span style={{ flex:1 }}>TRACK</span><span style={{ width:50, textAlign:"right" }}>FINISH</span><span style={{ width:50, textAlign:"right" }}>POINTS</span>
+            </div>
+            {p.log.map((x,i) => (
+              <div key={x.race} style={{ display:"flex", alignItems:"center", fontSize:13, padding:"7px 12px", background:i%2?"#0d1219":"#0f141c", borderTop:"1px solid #161d27" }}>
+                <span style={{ width:34, fontWeight:800, color:"#8b94a3" }}>{x.race}</span>
+                <span style={{ flex:1 }}>{TRACKS[x.race-1]}{WINNERS[x.race-1]===car && <span style={{ color:"#f7c948", fontWeight:800 }}> · WIN ★</span>}</span>
+                <span style={{ width:50, textAlign:"right", fontWeight:900, fontStyle:"italic", color:x.fin<=5?"#5fe08a":x.fin<=10?"#e9edf2":"#9aa3b0" }}>{x.fin}</span>
+                <span style={{ width:50, textAlign:"right", fontWeight:800 }}>{x.pts}</span>
+              </div>
+            ))}
+          </div>
+
+          <SectionLabel>Season 1 — Chase for the Kachow Cup</SectionLabel>
+          <div style={{ background:"#11161e", border:"1px solid #1c242f", borderRadius:10, padding:"11px 13px" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+              <div>
+                <div style={{ fontSize:24, fontWeight:900, fontStyle:"italic", color:"#f7c948", lineHeight:1 }}>{d.s1w}</div>
+                <div style={{ fontSize:9.5, color:"#7b8493", fontWeight:700, marginTop:2, letterSpacing:0.3 }}>SEASON 1 WINS</div>
+              </div>
+              {d.honor && <span style={{ fontSize:10, fontWeight:900, color:"#0a0d12", background:"#f7c948", borderRadius:5, padding:"4px 9px" }}>{d.honor}</span>}
+            </div>
+            {s1Wins.length > 0 ? (
+              <div style={{ marginTop:12 }}>
+                <div style={{ fontSize:9.5, letterSpacing:1, color:"#6b7484", fontWeight:800, marginBottom:7 }}>WON AT</div>
+                <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
+                  {s1Wins.map(w => (
+                    <span key={w.race} style={{ fontSize:11, fontWeight:700, background:"#0f141c", border:"1px solid #232c38", borderRadius:6, padding:"3px 8px" }}>{w.track} <span style={{ color:"#6b7484" }}>· R{w.race}</span></span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginTop:10, fontSize:11, color:"#7b8493" }}>No Season 1 wins.</div>
+            )}
+            <div style={{ fontSize:10, color:"#5b6472", marginTop:12, lineHeight:1.5 }}>Full Season&nbsp;1 race-by-race finishes &amp; points coming soon — Season&nbsp;1 had no stage points.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Tag({ children, gold }) {
+  return <span style={{ fontSize:10, fontWeight:800, letterSpacing:0.5, padding:"2px 7px", borderRadius:5, background:gold?"#f7c948":"rgba(0,0,0,0.35)", color:gold?"#0a0d12":"#e9edf2", border:gold?"none":"1px solid rgba(255,255,255,0.2)" }}>{children}</span>;
+}
+function SectionLabel({ children }) {
+  return <div style={{ fontSize:10, letterSpacing:1.5, color:"#6b7484", fontWeight:800, padding:"16px 2px 8px", textTransform:"uppercase" }}>{children}</div>;
+}
+function BigStat({ v, l, big }) {
+  return (
+    <div style={{ background:"#11161e", border:"1px solid #1c242f", borderRadius:9, padding:"9px 10px" }}>
+      <div style={{ fontSize:big?26:20, fontWeight:900, fontStyle:"italic", letterSpacing:-0.5, color:big?"#f7c948":"#e9edf2", fontVariantNumeric:"tabular-nums", lineHeight:1 }}>{v}</div>
+      <div style={{ fontSize:9.5, color:"#7b8493", fontWeight:700, marginTop:3, letterSpacing:0.3 }}>{l}</div>
+    </div>
+  );
+}
+function btn(disabled) {
+  return { width:40, height:40, borderRadius:10, border:"1px solid #2a333f", background:disabled?"#161b22":"#1e2733", color:disabled?"#3a424d":"#e9edf2", fontSize:16, fontWeight:900, cursor:disabled?"default":"pointer", flexShrink:0 };
+}
+function StatCard({ label, d, sub, accent, placeholder, onSelect }) {
+  return (
+    <div onClick={()=>!placeholder && onSelect && onSelect(d.car)} style={{ background:"#11161e", border:"1px solid #1c242f", borderRadius:10, padding:"9px 11px", display:"flex", alignItems:"center", gap:9, minHeight:56, cursor:placeholder?"default":"pointer" }}>
+      {placeholder ? <div style={{ width:38, height:38, borderRadius:8, background:"#1a212b", flexShrink:0 }} /> : <NumberChip d={d} size={38} />}
+      <div style={{ minWidth:0 }}>
+        <div style={{ fontSize:9, letterSpacing:1.2, color:"#7b8493", fontWeight:800 }}>{label}</div>
+        <div style={{ fontSize:14, fontWeight:800, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{placeholder?"—":d.name}</div>
+        <div style={{ fontSize:10, color:accent||"#8b94a3", fontWeight:700 }}>{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+
+  </script>
+</body>
+</html>
