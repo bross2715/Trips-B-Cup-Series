@@ -1,0 +1,934 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/><title>Trips B Cup Series</title><style>html,body,#root{margin:0;padding:0;background:#0A0A0B}*{box-sizing:border-box}</style><script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script><script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script></head><body><div id="root"></div><script type="text/babel" data-presets="react">
+
+    const { useState, useEffect, useCallback, useMemo } = React;
+    const _svg=(ch,s,c,e)=>React.createElement("svg",Object.assign({width:s||18,height:s||18,viewBox:"0 0 24 24",fill:"none",stroke:c||"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"},e||{}),ch);
+    const P=(d)=>React.createElement("path",{d,key:d});
+    const L=(a,b,x,y)=>React.createElement("line",{x1:a,y1:b,x2:x,y2:y,key:`${a}${b}${x}${y}`});
+    const PL=(pts)=>React.createElement("polyline",{points:pts,key:pts});
+    const Settings=({size,color})=>_svg([React.createElement("circle",{cx:12,cy:12,r:3,key:"c"}),P("M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z")],size,color);
+    const X=({size,color})=>_svg([L(18,6,6,18),L(6,6,18,18)],size,color);
+    const ChevronDown=({size,color})=>_svg([PL("6 9 12 15 18 9")],size,color);
+    const ChevronUp=({size,color})=>_svg([PL("18 15 12 9 6 15")],size,color);
+    const ChevronLeft=({size,color})=>_svg([PL("15 18 9 12 15 6")],size,color);
+    const ChevronRight=({size,color})=>_svg([PL("9 18 15 12 9 6")],size,color);
+    const Flag=({size,color})=>_svg([P("M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"),L(4,22,4,15)],size,color);
+    const Trophy=({size,color})=>_svg([P("M6 9H4.5a2.5 2.5 0 0 1 0-5H6"),P("M18 9h1.5a2.5 2.5 0 0 0 0-5H18"),P("M4 22h16"),P("M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"),P("M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"),P("M18 2H6v7a6 6 0 0 0 12 0V2Z")],size,color);
+    const Zap=({size,color})=>_svg([PL("13 2 3 14 12 14 11 22 21 10 12 10 13 2")],size,color);
+    const Crown=({size,color})=>_svg([P("M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14")],size,color);
+
+const SEED_PAYLOAD = {"version":22,"note":"Through Race 22 \u2014 Indianapolis","currentSeason":"2","seasonList":[{"id":"2","label":"Season 2","complete":false},{"id":"1","label":"Season 1","complete":true}],"seasons":{"2":{"complete":false,"drivers":[{"car":"27","name":"Brandon Ross","pts":730,"raceW":2,"stageW":1,"t5":14,"t10":17,"avg":8.27,"sp":0,"mll":2,"human":true,"partTimer":false,"s1Wins":6,"careerWins":8,"primary":"#00913F","number":"#FFFFFF","secondary":"#FFFFFF","rank":1,"plate":false,"manufacturer":"CHEVY","cardGradient":["#00913F","#0B3D22"],"s1Honor":"Season 1 Champion","chaseSeasons":[],"s1CarKey":"87","pid":"27"},{"car":"15","name":"Brandt Ross","pts":694,"raceW":4,"stageW":2,"t5":9,"t10":15,"avg":9.91,"sp":0,"mll":2,"human":true,"partTimer":false,"s1Wins":3,"careerWins":7,"primary":"#111111","number":"#FFFFFF","secondary":"#5DADE2","rank":2,"plate":false,"manufacturer":"CHEVY","cardGradient":["#111111","#5DADE2"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"24","pid":"15"},{"car":"6","name":"Brad Keselowski","pts":684,"raceW":1,"stageW":2,"t5":3,"t10":11,"avg":14.82,"sp":88,"mll":1,"human":false,"partTimer":false,"s1Wins":2,"careerWins":3,"primary":"#111111","number":"#0B6E2C","secondary":"#FFFFFF","rank":3,"plate":false,"manufacturer":"FORD","cardGradient":["#0B6E2C","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"6","pid":"6"},{"car":"12","name":"Ryan Blaney","pts":582,"raceW":1,"stageW":1,"t5":4,"t10":8,"avg":16.5,"sp":28,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":1,"primary":"#E6FF00","number":"#111111","secondary":"#111111","rank":4,"plate":false,"manufacturer":"FORD","cardGradient":["#E6FF00","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"12","pid":"12"},{"car":"17","name":"Chris Buescher","pts":577,"raceW":0,"stageW":1,"t5":3,"t10":7,"avg":18.14,"sp":69,"mll":1,"human":false,"partTimer":false,"s1Wins":1,"careerWins":1,"primary":"#1F3FBF","number":"#FFFFFF","secondary":"#C0C0C0","rank":5,"plate":false,"manufacturer":"FORD","cardGradient":["#1F3FBF","#C0C0C0"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"17","pid":"17"},{"car":"51","name":"Cody Ware","pts":571,"raceW":1,"stageW":2,"t5":4,"t10":6,"avg":17.5,"sp":29,"mll":2,"human":false,"partTimer":false,"s1Wins":1,"careerWins":2,"primary":"#E4002B","number":"#FFFFFF","secondary":"#FFFFFF","rank":6,"plate":false,"manufacturer":"FORD","cardGradient":["#E4002B","#FFFFFF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"51","pid":"51"},{"car":"41","name":"Cole Custer","pts":561,"raceW":1,"stageW":3,"t5":5,"t10":8,"avg":18.41,"sp":39,"mll":2,"human":false,"partTimer":false,"s1Wins":3,"careerWins":4,"primary":"#E2231A","number":"#1A1A1A","secondary":"#1A1A1A","rank":7,"plate":false,"manufacturer":"FORD","cardGradient":["#E2231A","#1A1A1A"],"s1Honor":"Season 1 Best CPU","chaseSeasons":[],"s1CarKey":"41","pid":"41"},{"car":"9","name":"Chase Elliott","pts":555,"raceW":1,"stageW":5,"t5":3,"t10":6,"avg":19.95,"sp":67,"mll":2,"human":false,"partTimer":false,"s1Wins":1,"careerWins":2,"primary":"#002F6C","number":"#FFD200","secondary":"#FFD200","rank":8,"plate":false,"manufacturer":"CHEVY","cardGradient":["#002F6C","#FFD200"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"9","pid":"9"},{"car":"24","name":"William Byron","pts":553,"raceW":1,"stageW":2,"t5":3,"t10":9,"avg":18.18,"sp":36,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":1,"primary":"#D62828","number":"#FFD200","secondary":"#FFD200","rank":9,"plate":false,"manufacturer":"CHEVY","cardGradient":["#D62828","#1F3FBF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":null,"pid":"24"},{"car":"34","name":"Todd Gilliland","pts":552,"raceW":2,"stageW":0,"t5":4,"t10":8,"avg":19.05,"sp":34,"mll":1,"human":false,"partTimer":false,"s1Wins":0,"careerWins":2,"primary":"#FFD200","number":"#111111","secondary":"#111111","rank":10,"plate":false,"manufacturer":"FORD","cardGradient":["#FFD200","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"34","pid":"34"},{"car":"48","name":"Alex Bowman","pts":550,"raceW":1,"stageW":1,"t5":4,"t10":5,"avg":18.68,"sp":44,"mll":0,"human":false,"partTimer":false,"s1Wins":2,"careerWins":3,"primary":"#6A1B9A","number":"#FFFFFF","secondary":"#19B6E8","rank":11,"plate":false,"manufacturer":"CHEVY","cardGradient":["#6A1B9A","#19B6E8"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"48","pid":"48"},{"car":"60","name":"Ryan Preece","pts":540,"raceW":0,"stageW":1,"t5":2,"t10":5,"avg":18.32,"sp":36,"mll":1,"human":false,"partTimer":false,"s1Wins":1,"careerWins":1,"primary":"#2A52BE","number":"#C0C0C0","secondary":"#C0C0C0","rank":12,"plate":false,"manufacturer":"FORD","cardGradient":["#2A52BE","#C0C0C0"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"60","pid":"60"},{"car":"2","name":"Austin Cindric","pts":533,"raceW":2,"stageW":2,"t5":5,"t10":5,"avg":19.68,"sp":29,"mll":1,"human":false,"partTimer":false,"s1Wins":0,"careerWins":2,"primary":"#FFFFFF","number":"#111111","secondary":"#111111","rank":13,"plate":false,"manufacturer":"FORD","cardGradient":["#111111","#E4002B"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"2","pid":"2"},{"car":"1","name":"Ross Chastain","pts":531,"raceW":0,"stageW":1,"t5":3,"t10":7,"avg":18.45,"sp":35,"mll":0,"human":false,"partTimer":false,"s1Wins":1,"careerWins":1,"primary":"#FF6A00","number":"#FFFFFF","secondary":"#111111","rank":14,"plate":false,"manufacturer":"CHEVY","cardGradient":["#FF6A00","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"1","pid":"1"},{"car":"5","name":"Kyle Larson","pts":530,"raceW":0,"stageW":4,"t5":3,"t10":5,"avg":20.05,"sp":64,"mll":1,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#1F6FEB","number":"#FFFFFF","secondary":"#FFFFFF","rank":15,"plate":false,"manufacturer":"CHEVY","cardGradient":["#1F6FEB","#E4002B"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"5","pid":"5"},{"car":"77","name":"Carson Hocevar","pts":513,"raceW":0,"stageW":0,"t5":3,"t10":5,"avg":18.82,"sp":25,"mll":0,"human":false,"partTimer":false,"s1Wins":2,"careerWins":2,"primary":"#FFD200","number":"#FFFFFF","secondary":"#FFFFFF","rank":16,"plate":false,"manufacturer":"CHEVY","cardGradient":["#FFD200","#FFFFFF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"77","pid":"77"},{"car":"8","name":"Kyle Busch","pts":506,"raceW":1,"stageW":0,"t5":5,"t10":7,"avg":20.82,"sp":42,"mll":1,"human":false,"partTimer":false,"s1Wins":0,"careerWins":1,"primary":"#2A52BE","number":"#FFFFFF","secondary":"#FFFFFF","rank":17,"plate":false,"manufacturer":"CHEVY","cardGradient":["#2A52BE","#FFFFFF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"8","pid":"8"},{"car":"16","name":"AJ Allmendinger","pts":491,"raceW":1,"stageW":2,"t5":2,"t10":4,"avg":20.91,"sp":29,"mll":1,"human":false,"partTimer":false,"s1Wins":0,"careerWins":1,"primary":"#FFFFFF","number":"#F26A21","secondary":"#F26A21","rank":18,"plate":false,"manufacturer":"CHEVY","cardGradient":["#FFFFFF","#F26A21"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"16","pid":"16"},{"car":"20","name":"Christopher Bell","pts":487,"raceW":0,"stageW":3,"t5":1,"t10":5,"avg":21.68,"sp":57,"mll":1,"human":false,"partTimer":false,"s1Wins":2,"careerWins":2,"primary":"#FFD200","number":"#111111","secondary":"#111111","rank":19,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#FFD200","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"20","pid":"20"},{"car":"42","name":"John Hunter Nemechek","pts":480,"raceW":0,"stageW":1,"t5":1,"t10":8,"avg":20.0,"sp":18,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#1E8449","number":"#FFFFFF","secondary":"#FFFFFF","rank":20,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#1E8449","#FFFFFF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"42","pid":"42"},{"car":"21","name":"Josh Berry","pts":469,"raceW":1,"stageW":0,"t5":1,"t10":4,"avg":20.36,"sp":0,"mll":0,"human":false,"partTimer":false,"s1Wins":1,"careerWins":2,"primary":"#E4002B","number":"#FFD200","secondary":"#FFD200","rank":21,"plate":false,"manufacturer":"FORD","cardGradient":["#E4002B","#FFFFFF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"21","pid":"21"},{"car":"19","name":"Chase Briscoe","pts":468,"raceW":0,"stageW":1,"t5":1,"t10":3,"avg":21.82,"sp":46,"mll":0,"human":false,"partTimer":false,"s1Wins":1,"careerWins":1,"primary":"#111111","number":"#F26A21","secondary":"#FFFFFF","rank":22,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#F26A21","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"19","pid":"19"},{"car":"45","name":"Tyler Reddick","pts":457,"raceW":0,"stageW":0,"t5":4,"t10":7,"avg":20.59,"sp":8,"mll":0,"human":false,"partTimer":false,"s1Wins":3,"careerWins":3,"primary":"#0FA3A3","number":"#111111","secondary":"#111111","rank":23,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#0FA3A3","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"45","pid":"45"},{"car":"22","name":"Joey Logano","pts":448,"raceW":0,"stageW":0,"t5":3,"t10":7,"avg":21.0,"sp":8,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#FFC72C","number":"#E4002B","secondary":"#E4002B","rank":24,"plate":false,"manufacturer":"FORD","cardGradient":["#FFC72C","#E4002B"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"22","pid":"22"},{"car":"54","name":"Ty Gibbs","pts":443,"raceW":0,"stageW":0,"t5":2,"t10":3,"avg":21.23,"sp":8,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#C8102E","number":"#FFFFFF","secondary":"#FFFFFF","rank":25,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#C8102E","#FFFFFF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"54","pid":"54"},{"car":"71","name":"Michael McDowell","pts":435,"raceW":0,"stageW":0,"t5":1,"t10":5,"avg":21.23,"sp":0,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#5DADE2","number":"#FFFFFF","secondary":"#FFFFFF","rank":26,"plate":false,"manufacturer":"CHEVY","cardGradient":["#5DADE2","#0B1E4D"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"71","pid":"71"},{"car":"35","name":"Riley Herbst","pts":434,"raceW":0,"stageW":0,"t5":1,"t10":4,"avg":21.27,"sp":0,"mll":0,"human":false,"partTimer":false,"s1Wins":1,"careerWins":1,"primary":"#2E933C","number":"#E4002B","secondary":"#E4002B","rank":27,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#2E933C","#E4002B"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"35","pid":"35"},{"car":"3","name":"Austin Dillon","pts":433,"raceW":0,"stageW":1,"t5":1,"t10":2,"avg":21.77,"sp":10,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#111111","number":"#FFFFFF","secondary":"#FFFFFF","rank":28,"plate":false,"manufacturer":"CHEVY","cardGradient":["#111111","#E4002B"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"3","pid":"3"},{"car":"11","name":"Denny Hamlin","pts":431,"raceW":0,"stageW":0,"t5":0,"t10":4,"avg":21.77,"sp":8,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#2A52BE","number":"#FFFFFF","secondary":"#FFFFFF","rank":29,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#2A52BE","#FFFFFF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"11","pid":"11"},{"car":"99","name":"Daniel Suarez","pts":425,"raceW":0,"stageW":2,"t5":2,"t10":2,"avg":23.23,"sp":29,"mll":1,"human":false,"partTimer":false,"s1Wins":1,"careerWins":1,"primary":"#2A52BE","number":"#FFFFFF","secondary":"#0B6E2C","rank":30,"plate":false,"manufacturer":"FORD","cardGradient":["#2A52BE","#0B6E2C"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"99","pid":"99"},{"car":"7","name":"Justin Haley","pts":421,"raceW":0,"stageW":1,"t5":1,"t10":3,"avg":23.45,"sp":35,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#111111","number":"#FFFFFF","secondary":"#FFFFFF","rank":31,"plate":false,"manufacturer":"CHEVY","cardGradient":["#111111","#FFD200"],"s1Honor":"Season 1 People's Champ","chaseSeasons":[],"s1CarKey":"7","pid":"7"},{"car":"10","name":"Ty Dillon","pts":415,"raceW":0,"stageW":0,"t5":2,"t10":3,"avg":23.5,"sp":25,"mll":1,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#D2B48C","number":"#E4002B","secondary":"#E4002B","rank":32,"plate":false,"manufacturer":"CHEVY","cardGradient":["#D2B48C","#E4002B"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"10","pid":"10"},{"car":"38","name":"Zane Smith","pts":412,"raceW":0,"stageW":0,"t5":0,"t10":3,"avg":22.64,"sp":8,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#2A52BE","number":"#FFFFFF","secondary":"#FFFFFF","rank":33,"plate":false,"manufacturer":"FORD","cardGradient":["#2A52BE","#9ACD32"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"38","pid":"38"},{"car":"23","name":"Bubba Wallace","pts":408,"raceW":0,"stageW":2,"t5":2,"t10":3,"avg":24.0,"sp":29,"mll":1,"human":false,"partTimer":false,"s1Wins":2,"careerWins":2,"primary":"#0FA3A3","number":"#FF5FA2","secondary":"#FF5FA2","rank":34,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#7A2FB5","#0FA3A3"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"23","pid":"23"},{"car":"4","name":"Noah Gragson","pts":391,"raceW":0,"stageW":0,"t5":3,"t10":3,"avg":23.95,"sp":16,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#FFD200","number":"#111111","secondary":"#111111","rank":35,"plate":false,"manufacturer":"FORD","cardGradient":["#FFD200","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"4","pid":"4"},{"car":"43","name":"Erik Jones","pts":378,"raceW":0,"stageW":0,"t5":0,"t10":4,"avg":23.82,"sp":0,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#1F3FBF","number":"#FFFFFF","secondary":"#FFFFFF","rank":36,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#1F3FBF","#0B6E2C"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"43","pid":"43"},{"car":"47","name":"Ricky Stenhouse Jr.","pts":363,"raceW":2,"stageW":0,"t5":2,"t10":3,"avg":26.68,"sp":18,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":2,"primary":"#111111","number":"#E4002B","secondary":"#E4002B","rank":37,"plate":false,"manufacturer":"CHEVY","cardGradient":["#111111","#E4002B"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"47","pid":"47"},{"car":"88","name":"Shane van Gisbergen","pts":350,"raceW":0,"stageW":1,"t5":0,"t10":1,"avg":26.27,"sp":26,"mll":0,"human":false,"partTimer":false,"s1Wins":1,"careerWins":1,"primary":"#FFFFFF","number":"#E4002B","secondary":"#E4002B","rank":38,"plate":false,"manufacturer":"CHEVY","cardGradient":["#FFFFFF","#E4002B"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"88","pid":"88"},{"car":"13","name":"Byron Ross","pts":164,"raceW":0,"stageW":0,"t5":0,"t10":1,"avg":33.55,"sp":0,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#D40000","number":"#111111","secondary":"#FFFFFF","rank":39,"plate":false,"manufacturer":"CHEVY","cardGradient":["#D40000","#FFFFFF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":null,"pid":"13"},{"car":"66","name":"Josh Bilicki","pts":91,"raceW":0,"stageW":0,"t5":0,"t10":0,"avg":22.8,"sp":0,"mll":0,"human":false,"partTimer":true,"s1Wins":0,"careerWins":0,"primary":"#FFFFFF","number":"#111111","secondary":"#111111","rank":40,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#FFFFFF","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"66","pid":"66"},{"car":"84","name":"Jimmie Johnson","pts":87,"raceW":0,"stageW":1,"t5":2,"t10":2,"avg":2.5,"sp":10,"mll":0,"human":false,"partTimer":true,"s1Wins":0,"careerWins":0,"primary":"#1E40AF","number":"#FFFFFF","secondary":"#FFFFFF","rank":41,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#1E40AF","#FFFFFF"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"84","pid":"84"},{"car":"87","name":"Connor Zilisch","pts":62,"raceW":0,"stageW":0,"t5":1,"t10":1,"avg":20.33,"sp":0,"mll":0,"human":false,"partTimer":true,"s1Wins":0,"careerWins":0,"primary":"#0B1E4D","number":"#FFFFFF","secondary":"#FFFFFF","rank":42,"plate":false,"manufacturer":"CHEVY","cardGradient":["#0B1E4D","#E4002B"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":null,"pid":"87"},{"car":"50","name":"Burt Myers","pts":57,"raceW":0,"stageW":0,"t5":0,"t10":1,"avg":12.5,"sp":0,"mll":0,"human":false,"partTimer":true,"s1Wins":0,"careerWins":0,"primary":"#E4002B","number":"#111111","secondary":"#111111","rank":43,"plate":false,"manufacturer":"CHEVY","cardGradient":["#E4002B","#111111"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"50","pid":"50"},{"car":"40","name":"Justin Allgaier","pts":51,"raceW":0,"stageW":0,"t5":0,"t10":0,"avg":15.5,"sp":0,"mll":0,"human":false,"partTimer":true,"s1Wins":0,"careerWins":0,"primary":"#D2B48C","number":"#FF5A1F","secondary":"#FF5A1F","rank":44,"plate":false,"manufacturer":"CHEVY","cardGradient":["#D2B48C","#FF5A1F"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"40","pid":"40"},{"car":"78","name":"BJ McLeod","pts":45,"raceW":0,"stageW":0,"t5":0,"t10":0,"avg":26.0,"sp":0,"mll":0,"human":false,"partTimer":true,"s1Wins":0,"careerWins":0,"primary":"#111111","number":"#39FF14","secondary":"#39FF14","rank":45,"plate":false,"manufacturer":"FORD","cardGradient":["#111111","#39FF14"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"78","pid":"78"},{"car":"44","name":"JJ Yeley","pts":30,"raceW":0,"stageW":0,"t5":0,"t10":0,"avg":11.0,"sp":0,"mll":0,"human":false,"partTimer":true,"s1Wins":0,"careerWins":0,"primary":"#111111","number":"#FFFFFF","secondary":"#FFFFFF","rank":46,"plate":false,"manufacturer":"CHEVY","cardGradient":["#111111","#F26A21"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"44","pid":"44"},{"car":"01","name":"Corey LaJoie","pts":29,"raceW":0,"stageW":0,"t5":0,"t10":0,"avg":26.5,"sp":0,"mll":0,"human":false,"partTimer":true,"s1Wins":1,"careerWins":1,"primary":"#111111","number":"#FFFFFF","secondary":"#FFFFFF","rank":47,"plate":false,"manufacturer":"FORD","cardGradient":["#111111","#FF6A00"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"01","pid":"01"},{"car":"56","name":"Martin Truex Jr.","pts":22,"raceW":0,"stageW":0,"t5":0,"t10":0,"avg":19.0,"sp":0,"mll":0,"human":false,"partTimer":true,"s1Wins":0,"careerWins":0,"primary":"#111111","number":"#F26A21","secondary":"#F26A21","rank":48,"plate":false,"manufacturer":"TOYOTA","cardGradient":["#111111","#F26A21"],"s1Honor":null,"chaseSeasons":[],"s1CarKey":"56","pid":"56"},{"car":"91","name":"H\u00e9lio Castroneves","pts":4,"raceW":0,"stageW":0,"t5":0,"t10":0,"avg":37.0,"sp":0,"mll":0,"human":false,"partTimer":false,"s1Wins":0,"careerWins":0,"primary":"#2A52BE","number":"#FFFFFF","secondary":"#FFFFFF","plate":false,"manufacturer":"CHEVY","cardGradient":["#2A52BE","#E4002B"],"s1Honor":null,"chaseSeasons":[],"team":"Trackhouse Racing","rank":49,"s1CarKey":"91","pid":"91"}],"winners":["27","16","34","12","15","24","48","6","34","15","47","41","51","8","15","2","27","2","21","47","15","9"],"tracks":["Daytona","Las Vegas","Phoenix","COTA","Bristol","Kansas","Talladega","Texas","Dover","Atlanta","Martinsville","Charlotte","Nashville","Darlington","Homestead","Sonoma","Michigan","New Hampshire","Watkins Glen","Iowa","Pocono","Indianapolis"],"mll":["41","16","34","9","23","99","15","5","10","15","51","6","51","8","27","60","27","2","41","17","20","9"],"stages":[{},{"s1":["15","16","1"],"s2":["16","1","27"]},{"s1":["48","34","1"],"s2":["1","27","34"]},{"s1":["9","12","34"],"s2":["9","12","88"]},{"s1":["23","10","88"],"s2":["88","23","10"]},{"s1":["99","8","27"],"s2":["99","19","8"]},{"s1":["15","17","7"],"s2":["7","27","5"]},{"s1":["5","6","77"],"s2":["5","6","24"]},{"s1":["5","9","10"],"s2":["9","15","5"]},{"s1":["20","19","77"],"s2":["23","77","42"]},{"s1":["3","47","4"],"s2":["19","51","11"]},{"s1":["41","6","17"],"s2":["6","41","17"],"s3":["6","60","9"]},{"s1":["51","17","5"],"s2":["5","27","17"]},{"s1":["42","99","8"],"s2":["12","8","45"]},{"s1":["27","15","38"],"s2":["84","27","15"]},{"s1":["2","60","8"],"s2":["60","2","22"]},{"s1":["20","6","7"],"s2":["20","7","6"]},{"s1":["2","17","4"],"s2":["51","34","24"]},{"s1":["41","19","48"],"s2":["41","19","48"]},{"s1":["17","20","6"],"s2":["16","47","17"]},{"s1":["24","20","60"],"s2":["24","20","54"]},{"s1":["9","48","6"],"s2":["9","48","6"]}],"prevMap":{"27":692,"77":488,"41":546,"6":631,"17":575,"43":367,"8":488,"9":475,"15":677,"34":547,"60":534,"19":442,"21":446,"10":406,"3":398,"48":493,"23":394,"11":397,"12":562,"51":539,"88":338,"99":389,"45":453,"5":501,"71":408,"22":429,"87":62,"24":520,"1":524,"38":404,"7":399,"35":418,"16":461,"54":422,"20":477,"42":449,"2":505,"47":360,"4":378,"13":163,"66":67,"44":30,"40":51,"78":45,"50":57,"01":29,"84":87,"56":22,"91":4},"note":"Through Race 22 \u2014 Indianapolis","winnerNames":{"27":"Brandon Ross","16":"AJ Allmendinger","34":"Todd Gilliland","12":"Ryan Blaney","15":"Brandt Ross","24":"William Byron","48":"Alex Bowman","6":"Brad Keselowski","47":"Ricky Stenhouse Jr.","41":"Cole Custer","51":"Cody Ware","8":"Kyle Busch","2":"Austin Cindric","21":"Josh Berry","9":"Chase Elliott"},"fullOrders":{"1":["27","77","41","6","17","43","8","9","15","34","60","19","21","10","3","48","23","11","12","51","88","99","45","5","71","22","87","24","1","38","7","35","16","54","20","42","2","47","4","13"],"2":["16","27","1","34","4","17","15","51","22","20","10","42","6","21","12","66","8","54","88","3","2","19","48","13","5","35","45","23","43","71","41","38","9","11","24","7","47","99","60","77"],"3":["34","48","15","27","41","42","12","1","22","5","44","23","43","21","54","51","77","17","6","19","3","45","16","10","7","11","47","2","24","9","60","4","35","20","8","88","38","99","71","13"],"4":["12","9","54","77","2","42","1","6","16","34","48","38","88","40","11","17","51","71","3","15","24","35","21","27","41","99","20","5","60","47","23","43","7","19","8","45","22","10","4","13"],"5":["15","10","27","17","23","20","88","11","7","24","35","5","3","38","47","1","77","22","54","12","9","42","21","51","6","45","2","71","60","16","78","8","41","48","4","99","34","43","13","19"],"6":["24","19","77","34","45","15","17","35","27","50","99","10","88","4","16","41","8","60","38","9","7","48","6","22","3","43","21","20","51","2","54","23","71","1","47","11","12","5","42","13"],"7":["48","16","15","27","5","1","71","43","7","42","13","38","60","4","51","47","17","3","34","77","21","9","35","2","12","6","19","22","23","20","54","66","45","88","11","10","8","41","99","24"],"8":["6","2","27","5","35","24","12","77","45","9","15","4","7","42","50","21","60","99","41","11","20","51","19","1","8","22","3","88","23","17","71","47","38","43","54","10","34","48","16","13"],"9":["34","15","10","9","22","5","48","54","43","6","60","77","20","41","01","16","99","24","38","35","47","71","19","17","12","88","4","2","21","51","8","11","23","27","45","1","3","7","42","13"],"10":["15","8","12","23","71","19","11","38","77","27","1","35","16","42","78","51","22","7","41","24","5","20","34","60","45","6","48","54","21","10","99","17","2","3","4","9","43","47","88","13"],"11":["47","51","4","15","3","21","16","19","22","41","2","27","35","38","54","71","60","10","11","1","20","88","43","17","24","23","45","12","99","34","48","6","7","9","8","5","42","01","77","13"],"12":["41","1","84","8","27","60","17","15","24","6","38","9","2","99","7","35","54","34","3","71","11","5","43","21","42","22","4","48","10","77","12","45","88","47","51","19","23","16","20","13"],"13":["51","27","2","5","41","15","8","6","17","42","60","11","20","1","3","35","13","19","24","45","34","9","99","48","54","7","43","77","87","16","23","4","22","71","12","38","47","10","88","21"],"14":["8","99","41","12","27","47","45","6","42","71","7","9","48","77","60","1","15","34","56","23","20","21","38","54","11","3","51","2","17","43","24","5","19","10","4","35","88","22","16","13"],"15":["15","84","27","51","48","38","1","9","35","24","77","19","3","10","4","41","5","54","12","13","88","20","34","6","7","42","16","60","45","21","22","71","99","17","47","11","2","8","23","43"],"16":["2","22","8","60","54","24","43","6","34","41","4","99","5","10","88","12","17","71","16","48","45","27","3","51","11","9","38","23","15","35","1","19","21","47","77","7","91","20","42","13"],"17":["27","20","15","7","87","21","45","60","12","6","51","19","54","23","99","8","35","9","13","16","4","47","71","17","48","11","22","42","77","24","2","41","88","43","3","1","5","34","38","10"],"18":["2","51","4","17","24","71","22","15","38","11","77","34","5","66","48","43","6","27","12","1","45","60","99","42","88","7","9","16","41","35","3","10","23","8","21","19","54","47","20","13"],"19":["21","1","27","45","12","41","20","35","42","71","11","51","24","16","23","43","48","17","19","9","6","60","8","77","2","10","22","54","3","99","7","78","38","4","34","88","5","47","15","13"],"20":["47","45","8","22","27","12","23","21","34","60","20","16","2","71","15","88","77","3","6","17","42","51","43","99","38","5","11","10","41","19","54","1","9","24","66","7","48","35","4","13"],"21":["15","24","60","42","45","10","20","13","27","6","12","54","48","47","17","21","40","1","5","19","7","2","43","34","99","38","4","77","11","3","23","71","8","16","41","88","22","35","51","9"],"22":["9","48","27","6","99","3","11","24","51","42","16","5","2","71","19","77","66","21","7","54","12","22","8","15","35","41","23","4","88","43","20","10","38","1","60","34","45","47","17","13"]}},"1":{"complete":true,"standings":[{"rank":1,"car":"87","pid":"27","name":"Brandon Ross","pts":380,"ptsType":"chase","wins":6},{"rank":2,"car":"24","pid":"15","name":"Brandt Ross","pts":357,"ptsType":"chase","wins":3},{"rank":3,"car":"6","pid":"6","name":"Brad Keselowski","pts":300,"ptsType":"chase","wins":2},{"rank":4,"car":"23","pid":"23","name":"Bubba Wallace","pts":280,"ptsType":"chase","wins":2},{"rank":5,"car":"41","pid":"41","name":"Cole Custer","pts":276,"ptsType":"chase","wins":3},{"rank":6,"car":"1","pid":"1","name":"Ross Chastain","pts":265,"ptsType":"chase","wins":1},{"rank":7,"car":"19","pid":"19","name":"Chase Briscoe","pts":246,"ptsType":"chase","wins":1},{"rank":8,"car":"17","pid":"17","name":"Chris Buescher","pts":237,"ptsType":"chase","wins":1},{"rank":9,"car":"88","pid":"88","name":"Shane van Gisbergen","pts":217,"ptsType":"chase","wins":1},{"rank":10,"car":"20","pid":"20","name":"Christopher Bell","pts":213,"ptsType":"chase","wins":2},{"rank":11,"car":"3","pid":"3","name":"Austin Dillon","pts":196,"ptsType":"chase","wins":0},{"rank":12,"car":"4","pid":"4","name":"Noah Gragson","pts":194,"ptsType":"chase","wins":0},{"rank":13,"car":"7","pid":"7","name":"Justin Haley","pts":840,"ptsType":"season","wins":0},{"rank":14,"car":"45","pid":"45","name":"Tyler Reddick","pts":831,"ptsType":"season","wins":3},{"rank":15,"car":"60","pid":"60","name":"Ryan Preece","pts":786,"ptsType":"season","wins":1},{"rank":16,"car":"35","pid":"35","name":"Riley Herbst","pts":784,"ptsType":"season","wins":1},{"rank":17,"car":"11","pid":"11","name":"Denny Hamlin","pts":777,"ptsType":"season","wins":0},{"rank":18,"car":"38","pid":"38","name":"Zane Smith","pts":767,"ptsType":"season","wins":0},{"rank":19,"car":"2","pid":"2","name":"Austin Cindric","pts":757,"ptsType":"season","wins":0},{"rank":20,"car":"12","pid":"12","name":"Ryan Blaney","pts":754,"ptsType":"season","wins":0},{"rank":21,"car":"9","pid":"9","name":"Chase Elliott","pts":747,"ptsType":"season","wins":1},{"rank":22,"car":"10","pid":"10","name":"Ty Dillon","pts":738,"ptsType":"season","wins":0},{"rank":23,"car":"48","pid":"48","name":"Alex Bowman","pts":716,"ptsType":"season","wins":2},{"rank":24,"car":"43","pid":"43","name":"Erik Jones","pts":711,"ptsType":"season","wins":0},{"rank":25,"car":"99","pid":"99","name":"Daniel Suarez","pts":710,"ptsType":"season","wins":1},{"rank":26,"car":"21","pid":"21","name":"Josh Berry","pts":707,"ptsType":"season","wins":1},{"rank":27,"car":"47","pid":"47","name":"Ricky Stenhouse Jr.","pts":707,"ptsType":"season","wins":0},{"rank":28,"car":"77","pid":"77","name":"Carson Hocevar","pts":706,"ptsType":"season","wins":2},{"rank":29,"car":"22","pid":"22","name":"Joey Logano","pts":683,"ptsType":"season","wins":0},{"rank":30,"car":"34","pid":"34","name":"Todd Gilliland","pts":665,"ptsType":"season","wins":0},{"rank":31,"car":"16","pid":"16","name":"AJ Allmendinger","pts":647,"ptsType":"season","wins":0},{"rank":32,"car":"5","pid":"5","name":"Kyle Larson","pts":639,"ptsType":"season","wins":0},{"rank":33,"car":"71","pid":"71","name":"Michael McDowell","pts":628,"ptsType":"season","wins":0},{"rank":34,"car":"51","pid":"51","name":"Cody Ware","pts":623,"ptsType":"season","wins":1},{"rank":35,"car":"54","pid":"54","name":"Ty Gibbs","pts":597,"ptsType":"season","wins":0},{"rank":36,"car":"8","pid":"8","name":"Kyle Busch","pts":584,"ptsType":"season","wins":0},{"rank":37,"car":"42","pid":"42","name":"John Hunter Nemechek","pts":536,"ptsType":"season","wins":0},{"rank":38,"car":"40","pid":"40","name":"Justin Allgaier","pts":340,"ptsType":"season","wins":0},{"rank":39,"car":"66","pid":"66","name":"Josh Bilicki","pts":305,"ptsType":"season","wins":0},{"rank":40,"car":"78","pid":"78","name":"BJ McLeod","pts":302,"ptsType":"season","wins":0},{"rank":41,"car":"01","pid":"01","name":"Corey LaJoie","pts":279,"ptsType":"season","wins":1},{"rank":42,"car":"50","pid":"50","name":"Burt Myers","pts":255,"ptsType":"season","wins":0},{"rank":43,"car":"84","pid":"84","name":"Jimmie Johnson","pts":222,"ptsType":"season","wins":0},{"rank":44,"car":"91","pid":"91","name":"H\u00e9lio Castroneves","pts":181,"ptsType":"season","wins":0},{"rank":45,"car":"56","pid":"56","name":"Martin Truex Jr.","pts":155,"ptsType":"season","wins":0},{"rank":46,"car":"44","pid":"44","name":"JJ Yeley","pts":153,"ptsType":"season","wins":0}],"champion":"87","championName":"Brandon Ross","runnerUp":"24","runnerUpName":"Brandt Ross","finalChase":[{"pos":1,"car":"87","pts":380,"name":"Brandon Ross"},{"pos":2,"car":"24","pts":357,"name":"Brandt Ross"},{"pos":3,"car":"6","pts":300,"name":"Brad Keselowski"},{"pos":4,"car":"23","pts":280,"name":"Bubba Wallace"},{"pos":5,"car":"41","pts":276,"name":"Cole Custer"},{"pos":6,"car":"1","pts":265,"name":"Ross Chastain"},{"pos":7,"car":"19","pts":246,"name":"Chase Briscoe"},{"pos":8,"car":"17","pts":237,"name":"Chris Buescher"},{"pos":9,"car":"88","pts":217,"name":"Shane van Gisbergen"},{"pos":10,"car":"20","pts":213,"name":"Christopher Bell"},{"pos":11,"car":"3","pts":196,"name":"Austin Dillon"},{"pos":12,"car":"4","pts":194,"name":"Noah Gragson"}],"regGrid":[{"seed":1,"car":"87","pts":819,"name":"Brandon Ross"},{"seed":2,"car":"24","pts":699,"name":"Brandt Ross"},{"seed":3,"car":"41","pts":690,"name":"Cole Custer"},{"seed":4,"car":"20","pts":652,"name":"Christopher Bell"},{"seed":5,"car":"17","pts":620,"name":"Chris Buescher"},{"seed":6,"car":"88","pts":613,"name":"Shane van Gisbergen"},{"seed":7,"car":"1","pts":603,"name":"Ross Chastain"},{"seed":8,"car":"6","pts":596,"name":"Brad Keselowski"},{"seed":9,"car":"4","pts":595,"name":"Noah Gragson"},{"seed":10,"car":"19","pts":575,"name":"Chase Briscoe"},{"seed":11,"car":"23","pts":572,"name":"Bubba Wallace"},{"seed":12,"car":"3","pts":572,"name":"Austin Dillon"}],"index":[{"race":1,"track":"Daytona","winner":"6","winnerName":"Brad Keselowski","mll":"\u2014","field":40,"type":"Superspeedway"},{"race":2,"track":"Las Vegas","winner":"19","winnerName":"Chase Briscoe","mll":"\u2014","field":40,"type":"Intermediate"},{"race":3,"track":"EchoPark","winner":"24","winnerName":"Brandt Ross","mll":"\u2014","field":40,"type":"Superspeedway"},{"race":4,"track":"Phoenix","winner":"45","winnerName":"Tyler Reddick","mll":"\u2014","field":40,"type":"Short Track"},{"race":5,"track":"Bristol","winner":"41","winnerName":"Cole Custer","mll":"\u2014","field":40,"type":"Concrete"},{"race":6,"track":"Dover","winner":"48","winnerName":"Alex Bowman","mll":"\u2014","field":40,"type":"Concrete"},{"race":7,"track":"COTA","winner":"23","winnerName":"Bubba Wallace","mll":"\u2014","field":40,"type":"Road Course"},{"race":8,"track":"Richmond","winner":"20","winnerName":"Christopher Bell","mll":"20","field":40,"type":"Short Track"},{"race":9,"track":"Texas","winner":"35","winnerName":"Riley Herbst","mll":"35","field":40,"type":"Intermediate"},{"race":10,"track":"Kansas","winner":"24","winnerName":"Brandt Ross","mll":"41","field":39,"type":"Intermediate"},{"race":11,"track":"Talladega","winner":"24","winnerName":"Brandt Ross","mll":"24","field":40,"type":"Superspeedway"},{"race":12,"track":"Martinsville","winner":"41","winnerName":"Cole Custer","mll":"41","field":40,"type":"Short Track"},{"race":13,"track":"Charlotte","winner":"87","winnerName":"Brandon Ross","mll":"38","field":40,"type":"Intermediate"},{"race":14,"track":"Darlington","winner":"1","winnerName":"Ross Chastain","mll":"47","field":40,"type":"Intermediate"},{"race":15,"track":"Sonoma","winner":"41","winnerName":"Cole Custer","mll":"41","field":40,"type":"Road Course"},{"race":16,"track":"New Hampshire","winner":"45","winnerName":"Tyler Reddick","mll":"19","field":39,"type":"Short Track"},{"race":17,"track":"Michigan","winner":"99","winnerName":"Daniel Suarez","mll":"60","field":39,"type":"Intermediate"},{"race":18,"track":"Nashville","winner":"88","winnerName":"Shane van Gisbergen","mll":"24","field":40,"type":"Concrete"},{"race":19,"track":"Iowa","winner":"87","winnerName":"Brandon Ross","mll":"88","field":40,"type":"Short Track"},{"race":20,"track":"Chicago Street Course","winner":"77","winnerName":"Carson Hocevar","mll":"41","field":39,"type":"Road Course"},{"race":21,"track":"Pocono","winner":"17","winnerName":"Chris Buescher","mll":"17","field":40,"type":"Intermediate"},{"race":22,"track":"Indianapolis","winner":"87","winnerName":"Brandon Ross","mll":"24","field":40,"type":"Intermediate"},{"race":23,"track":"Gateway","winner":"87","winnerName":"Brandon Ross","mll":"87","field":40,"type":"Intermediate"},{"race":24,"track":"Watkins Glen","winner":"20","winnerName":"Christopher Bell","mll":"20","field":40,"type":"Road Course"},{"race":25,"track":"Richmond","winner":"21","winnerName":"Josh Berry","mll":"21","field":40,"type":"Short Track"},{"race":26,"track":"Daytona","winner":"01","winnerName":"Corey LaJoie","mll":"20","field":40,"type":"Superspeedway"},{"race":27,"track":"Darlington","winner":"23","winnerName":"Bubba Wallace","mll":"23","field":38,"type":"Intermediate"},{"race":28,"track":"Texas","winner":"9","winnerName":"Chase Elliott","mll":"2","field":40,"type":"Intermediate"},{"race":29,"track":"Bristol","winner":"6","winnerName":"Brad Keselowski","mll":"6","field":40,"type":"Concrete"},{"race":30,"track":"Homestead","winner":"87","winnerName":"Brandon Ross","mll":"16","field":40,"type":"Intermediate"},{"race":31,"track":"Sonoma","winner":"45","winnerName":"Tyler Reddick","mll":"23","field":40,"type":"Road Course"},{"race":32,"track":"Las Vegas","winner":"51","winnerName":"Cody Ware","mll":"51","field":40,"type":"Intermediate"},{"race":33,"track":"Martinsville","winner":"60","winnerName":"Ryan Preece","mll":"24","field":40,"type":"Short Track"},{"race":34,"track":"Talladega","winner":"87","winnerName":"Brandon Ross","mll":"87","field":40,"type":"Superspeedway"},{"race":35,"track":"Phoenix","winner":"48","winnerName":"Alex Bowman","mll":"19","field":40,"type":"Short Track"},{"race":36,"track":"EchoPark","winner":"77","winnerName":"Carson Hocevar","mll":"87","field":40,"type":"Superspeedway"}],"colorMap":{"44":{"primary":"#111111","number":"#FFFFFF","plate":false,"grad":["#111111","#F26A21"]},"84":{"primary":"#1E40AF","number":"#FFFFFF","plate":false,"grad":["#1E40AF","#FFFFFF"]},"56":{"primary":"#111111","number":"#F26A21","plate":false,"grad":["#111111","#F26A21"]},"20":{"primary":"#FFD200","number":"#111111","plate":false,"grad":["#FFD200","#111111"]},"11":{"primary":"#2A52BE","number":"#FFFFFF","plate":false,"grad":["#2A52BE","#FFFFFF"]},"9":{"primary":"#002F6C","number":"#FFD200","plate":false,"grad":["#002F6C","#FFD200"]},"3":{"primary":"#111111","number":"#FFFFFF","plate":false,"grad":["#111111","#E4002B"]},"8":{"primary":"#2A52BE","number":"#FFFFFF","plate":false,"grad":["#2A52BE","#FFFFFF"]},"45":{"primary":"#0FA3A3","number":"#111111","plate":false,"grad":["#0FA3A3","#111111"]},"99":{"primary":"#2A52BE","number":"#FFFFFF","plate":false,"grad":["#2A52BE","#0B6E2C"]},"12":{"primary":"#E6FF00","number":"#111111","plate":false,"grad":["#E6FF00","#111111"]},"6":{"primary":"#111111","number":"#0B6E2C","plate":false,"grad":["#0B6E2C","#111111"]},"17":{"primary":"#1F3FBF","number":"#FFFFFF","plate":false,"grad":["#1F3FBF","#C0C0C0"]},"42":{"primary":"#1E8449","number":"#FFFFFF","plate":false,"grad":["#1E8449","#FFFFFF"]},"88":{"primary":"#FFFFFF","number":"#E4002B","plate":false,"grad":["#FFFFFF","#E4002B"]},"24":{"primary":"#D40000","number":"#FFD200","plate":false,"grad":["#D40000","#111111"]},"47":{"primary":"#111111","number":"#E4002B","plate":false,"grad":["#111111","#E4002B"]},"77":{"primary":"#FFD200","number":"#FFFFFF","plate":false,"grad":["#FFD200","#FFFFFF"]},"43":{"primary":"#1F3FBF","number":"#FFFFFF","plate":false,"grad":["#1F3FBF","#0B6E2C"]},"51":{"primary":"#E4002B","number":"#FFFFFF","plate":false,"grad":["#E4002B","#FFFFFF"]},"7":{"primary":"#111111","number":"#FFFFFF","plate":false,"grad":["#111111","#FFD200"]},"50":{"primary":"#E4002B","number":"#111111","plate":false,"grad":["#E4002B","#111111"]},"35":{"primary":"#2E933C","number":"#E4002B","plate":false,"grad":["#2E933C","#E4002B"]},"19":{"primary":"#111111","number":"#F26A21","plate":false,"grad":["#F26A21","#111111"]},"34":{"primary":"#FFD200","number":"#111111","plate":false,"grad":["#FFD200","#111111"]},"40":{"primary":"#D2B48C","number":"#FF5A1F","plate":false,"grad":["#D2B48C","#FF5A1F"]},"54":{"primary":"#C8102E","number":"#FFFFFF","plate":false,"grad":["#C8102E","#FFFFFF"]},"01":{"primary":"#111111","number":"#FFFFFF","plate":false,"grad":["#111111","#FF6A00"]},"21":{"primary":"#E4002B","number":"#FFD200","plate":false,"grad":["#E4002B","#FFFFFF"]},"2":{"primary":"#FFFFFF","number":"#111111","plate":false,"grad":["#111111","#E4002B"]},"87":{"primary":"#0B1E4D","number":"#FFFFFF","plate":false,"grad":["#0B1E4D","#050C1F"]},"5":{"primary":"#1F6FEB","number":"#FFFFFF","plate":false,"grad":["#1F6FEB","#E4002B"]},"91":{"primary":"#2A52BE","number":"#FFFFFF","plate":false,"grad":["#2A52BE","#E4002B"]},"66":{"primary":"#FFFFFF","number":"#111111","plate":false,"grad":["#FFFFFF","#111111"]},"78":{"primary":"#111111","number":"#39FF14","plate":false,"grad":["#111111","#39FF14"]},"1":{"primary":"#FF6A00","number":"#FFFFFF","plate":false,"grad":["#FF6A00","#111111"]},"48":{"primary":"#6A1B9A","number":"#FFFFFF","plate":false,"grad":["#6A1B9A","#19B6E8"]},"60":{"primary":"#2A52BE","number":"#C0C0C0","plate":false,"grad":["#2A52BE","#C0C0C0"]},"71":{"primary":"#5DADE2","number":"#FFFFFF","plate":false,"grad":["#5DADE2","#0B1E4D"]},"23":{"primary":"#0FA3A3","number":"#FF5FA2","plate":false,"grad":["#7A2FB5","#0FA3A3"]},"16":{"primary":"#FFFFFF","number":"#F26A21","plate":false,"grad":["#FFFFFF","#F26A21"]},"41":{"primary":"#E2231A","number":"#1A1A1A","plate":false,"grad":["#E2231A","#1A1A1A"]},"38":{"primary":"#2A52BE","number":"#FFFFFF","plate":false,"grad":["#2A52BE","#9ACD32"]},"4":{"primary":"#FFD200","number":"#111111","plate":false,"grad":["#FFD200","#111111"]},"22":{"primary":"#FFC72C","number":"#E4002B","plate":false,"grad":["#FFC72C","#E4002B"]},"10":{"primary":"#D2B48C","number":"#E4002B","plate":false,"grad":["#D2B48C","#E4002B"]}},"note":"Season 1 \u2014 Complete (36 races)","profiles":{"44":{"car":"44","name":"JJ Yeley","starts":11,"wins":0,"mll":0,"t5":0,"t10":0,"avg":25.55,"best":11,"worst":36,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Concrete":33.0,"Road Course":34.0,"Short Track":19.0,"Superspeedway":34.0,"Intermediate":25.5},"trackTypeCount":{"Concrete":1,"Road Course":1,"Short Track":5,"Superspeedway":2,"Intermediate":2},"fins":[[5,33],[7,34],[8,24],[11,36],[12,11],[13,29],[19,24],[25,22],[28,22],[35,14],[36,32]]},"84":{"car":"84","name":"Jimmie Johnson","starts":10,"wins":0,"mll":0,"t5":2,"t10":2,"avg":21.1,"best":3,"worst":35,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Concrete":24.0,"Intermediate":19.67,"Short Track":31.0,"Superspeedway":14.0},"trackTypeCount":{"Concrete":2,"Intermediate":6,"Short Track":1,"Superspeedway":1},"fins":[[5,27],[10,3],[14,23],[16,31],[17,24],[18,21],[21,5],[27,35],[30,28],[34,14]]},"56":{"car":"56","name":"Martin Truex Jr.","starts":9,"wins":0,"mll":0,"t5":0,"t10":1,"avg":26.22,"best":9,"worst":39,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Short Track":36.0,"Superspeedway":23.75,"Concrete":9.0,"Intermediate":30.0,"Road Course":30.0},"trackTypeCount":{"Short Track":2,"Superspeedway":4,"Concrete":1,"Intermediate":1,"Road Course":1},"fins":[[8,33],[11,23],[18,9],[19,39],[23,30],[24,30],[26,24],[34,34],[36,14]]},"20":{"car":"20","name":"Christopher Bell","starts":35,"wins":2,"mll":3,"t5":5,"t10":7,"avg":19.4,"best":1,"worst":35,"regPts":652,"finalChasePts":213,"madeChase":true,"trackTypeAvg":{"Superspeedway":26.0,"Intermediate":21.08,"Short Track":18.38,"Concrete":20.5,"Road Course":8.2},"trackTypeCount":{"Superspeedway":6,"Intermediate":12,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,35],[2,27],[3,23],[4,18],[5,16],[6,30],[7,14],[8,1],[9,29],[10,18],[11,20],[12,22],[13,4],[14,13],[15,7],[16,29],[18,5],[19,22],[20,5],[21,10],[22,29],[23,13],[24,1],[25,20],[26,33],[27,31],[28,31],[29,31],[30,26],[31,14],[32,22],[33,20],[34,29],[35,15],[36,16]]},"11":{"car":"11","name":"Denny Hamlin","starts":36,"wins":0,"mll":0,"t5":5,"t10":9,"avg":19.39,"best":2,"worst":38,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":18.17,"Intermediate":19.54,"Short Track":20.0,"Concrete":13.75,"Road Course":24.0},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,17],[2,16],[3,25],[4,28],[5,12],[6,2],[7,30],[8,27],[9,4],[10,4],[11,32],[12,32],[13,19],[14,33],[15,27],[16,9],[17,26],[18,24],[19,36],[20,9],[21,38],[22,26],[23,31],[24,37],[25,13],[26,8],[27,15],[28,4],[29,17],[30,13],[31,17],[32,25],[33,3],[34,10],[35,12],[36,17]]},"9":{"car":"9","name":"Chase Elliott","starts":36,"wins":1,"mll":0,"t5":3,"t10":8,"avg":20.58,"best":1,"worst":38,"regPts":568,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":20.0,"Intermediate":19.69,"Short Track":23.75,"Concrete":15.5,"Road Course":22.6},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,27],[2,14],[3,4],[4,19],[5,32],[6,6],[7,27],[8,36],[9,26],[10,25],[11,19],[12,8],[13,25],[14,18],[15,12],[16,21],[17,17],[18,6],[19,37],[20,32],[21,25],[22,9],[23,20],[24,16],[25,2],[26,12],[27,9],[28,1],[29,18],[30,33],[31,26],[32,34],[33,38],[34,28],[35,29],[36,30]]},"3":{"car":"3","name":"Austin Dillon","starts":36,"wins":0,"mll":0,"t5":5,"t10":10,"avg":19.64,"best":2,"worst":38,"regPts":572,"finalChasePts":196,"madeChase":true,"trackTypeAvg":{"Superspeedway":24.67,"Intermediate":21.15,"Short Track":14.38,"Concrete":23.25,"Road Course":15.2},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,18],[2,21],[3,34],[4,27],[5,34],[6,24],[7,23],[8,2],[9,32],[10,11],[11,30],[12,36],[13,9],[14,38],[15,19],[16,14],[17,33],[18,2],[19,2],[20,14],[21,24],[22,4],[23,11],[24,10],[25,5],[26,16],[27,6],[28,38],[29,33],[30,24],[31,10],[32,24],[33,9],[34,12],[35,20],[36,38]]},"8":{"car":"8","name":"Kyle Busch","starts":36,"wins":0,"mll":0,"t5":1,"t10":5,"avg":23.92,"best":2,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":25.0,"Intermediate":22.85,"Short Track":26.12,"Concrete":25.25,"Road Course":20.8},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,29],[2,24],[3,38],[4,29],[5,35],[6,20],[7,39],[8,13],[9,18],[10,22],[11,11],[12,29],[13,11],[14,27],[15,13],[16,37],[17,11],[18,8],[19,15],[20,38],[21,27],[22,37],[23,35],[24,12],[25,12],[26,35],[27,26],[28,9],[29,38],[30,10],[31,2],[32,40],[33,40],[34,9],[35,34],[36,28]]},"45":{"car":"45","name":"Tyler Reddick","starts":36,"wins":3,"mll":0,"t5":5,"t10":12,"avg":19.06,"best":1,"worst":38,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":25.33,"Intermediate":19.46,"Short Track":14.38,"Concrete":14.25,"Road Course":21.8},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,38],[2,20],[3,9],[4,1],[5,21],[6,10],[7,37],[8,30],[9,34],[10,30],[11,27],[12,35],[13,32],[14,15],[15,17],[16,1],[17,35],[18,17],[19,12],[20,26],[21,8],[22,5],[23,9],[24,28],[25,14],[26,27],[27,19],[28,30],[29,9],[30,6],[31,1],[32,10],[33,5],[34,27],[35,17],[36,24]]},"99":{"car":"99","name":"Daniel Suarez","starts":36,"wins":1,"mll":0,"t5":4,"t10":8,"avg":21.58,"best":1,"worst":39,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":18.83,"Intermediate":21.38,"Short Track":27.25,"Concrete":10.75,"Road Course":25.0},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,15],[2,29],[3,8],[4,22],[5,2],[6,7],[7,18],[8,35],[9,12],[10,23],[11,10],[12,14],[13,18],[14,14],[15,34],[16,33],[17,1],[18,11],[19,38],[20,35],[21,2],[22,30],[23,26],[24,35],[25,35],[26,34],[27,30],[28,19],[29,23],[30,39],[31,3],[32,35],[33,30],[34,36],[35,11],[36,10]]},"12":{"car":"12","name":"Ryan Blaney","starts":36,"wins":0,"mll":0,"t5":5,"t10":9,"avg":20.0,"best":2,"worst":39,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":23.0,"Intermediate":20.38,"Short Track":18.88,"Concrete":20.25,"Road Course":17.0},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,23],[2,38],[3,16],[4,17],[5,29],[6,35],[7,21],[8,16],[9,9],[10,12],[11,38],[12,4],[13,33],[14,22],[15,24],[16,7],[17,20],[18,3],[19,34],[20,27],[21,23],[22,16],[23,25],[24,5],[25,15],[26,9],[27,2],[28,36],[29,14],[30,3],[31,8],[32,26],[33,39],[34,26],[35,19],[36,26]]},"6":{"car":"6","name":"Brad Keselowski","starts":36,"wins":2,"mll":1,"t5":7,"t10":14,"avg":17.61,"best":1,"worst":40,"regPts":596,"finalChasePts":300,"madeChase":true,"trackTypeAvg":{"Superspeedway":10.83,"Intermediate":20.38,"Short Track":12.25,"Concrete":27.25,"Road Course":19.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,1],[2,23],[3,5],[4,16],[5,40],[6,34],[7,8],[8,7],[9,31],[10,13],[11,22],[12,13],[13,39],[14,36],[15,6],[16,3],[17,10],[18,34],[19,10],[20,28],[21,4],[22,7],[23,27],[24,20],[25,17],[26,30],[27,8],[28,15],[29,1],[30,36],[31,35],[32,16],[33,16],[34,4],[35,16],[36,3]]},"17":{"car":"17","name":"Chris Buescher","starts":35,"wins":1,"mll":1,"t5":3,"t10":12,"avg":18.74,"best":1,"worst":38,"regPts":620,"finalChasePts":237,"madeChase":true,"trackTypeAvg":{"Superspeedway":14.83,"Intermediate":19.08,"Short Track":19.5,"Concrete":17.25,"Road Course":22.6},"trackTypeCount":{"Superspeedway":6,"Intermediate":12,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,16],[2,34],[3,20],[4,6],[5,6],[6,37],[7,33],[8,21],[9,37],[10,9],[11,9],[12,15],[13,21],[14,5],[15,11],[16,34],[17,7],[18,10],[19,29],[20,16],[21,1],[22,18],[23,7],[24,26],[25,27],[26,5],[28,35],[29,16],[30,17],[31,27],[32,38],[33,18],[34,8],[35,6],[36,31]]},"42":{"car":"42","name":"John Hunter Nemechek","starts":36,"wins":0,"mll":0,"t5":1,"t10":2,"avg":26.06,"best":2,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":25.0,"Intermediate":21.62,"Short Track":29.38,"Concrete":33.75,"Road Course":27.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,21],[2,2],[3,18],[4,30],[5,28],[6,38],[7,28],[8,29],[9,24],[10,8],[11,28],[12,34],[13,14],[14,30],[15,16],[16,20],[17,39],[18,35],[19,32],[20,29],[21,28],[22,15],[23,18],[24,40],[25,37],[26,28],[27,25],[28,32],[29,34],[30,31],[31,24],[32,15],[33,14],[34,15],[35,39],[36,40]]},"88":{"car":"88","name":"Shane van Gisbergen","starts":36,"wins":1,"mll":1,"t5":5,"t10":12,"avg":19.22,"best":1,"worst":40,"regPts":613,"finalChasePts":217,"madeChase":true,"trackTypeAvg":{"Superspeedway":22.67,"Intermediate":20.31,"Short Track":16.62,"Concrete":5.25,"Road Course":27.6},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,7],[2,22],[3,36],[4,23],[5,8],[6,9],[7,17],[8,8],[9,23],[10,15],[11,5],[12,9],[13,5],[14,9],[15,29],[16,19],[17,36],[18,1],[19,3],[20,21],[21,33],[22,22],[23,17],[24,34],[25,24],[26,36],[27,29],[28,11],[29,3],[30,29],[31,37],[32,13],[33,7],[34,32],[35,40],[36,20]]},"24":{"car":"24","name":"Brandt Ross","starts":36,"wins":3,"mll":4,"t5":15,"t10":18,"avg":13.75,"best":1,"worst":40,"regPts":699,"finalChasePts":357,"madeChase":true,"trackTypeAvg":{"Superspeedway":9.33,"Intermediate":12.31,"Short Track":12.62,"Concrete":9.5,"Road Course":28.0},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,14],[2,15],[3,1],[4,7],[5,4],[6,25],[7,11],[8,4],[9,3],[10,1],[11,1],[12,27],[13,3],[14,25],[15,40],[16,39],[17,25],[18,7],[19,5],[20,22],[21,12],[22,34],[23,2],[24,27],[25,4],[26,31],[27,16],[28,3],[29,2],[30,2],[31,40],[32,19],[33,2],[34,3],[35,13],[36,6]]},"47":{"car":"47","name":"Ricky Stenhouse Jr.","starts":36,"wins":0,"mll":1,"t5":4,"t10":9,"avg":21.36,"best":2,"worst":39,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":22.67,"Intermediate":17.23,"Short Track":18.0,"Concrete":24.25,"Road Course":33.6},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,24],[2,13],[3,37],[4,13],[5,7],[6,21],[7,29],[8,5],[9,19],[10,28],[11,16],[12,7],[13,24],[14,2],[15,33],[16,30],[17,2],[18,30],[19,16],[20,37],[21,9],[22,13],[23,21],[24,38],[25,36],[26,10],[27,34],[28,26],[29,39],[30,27],[31,31],[32,6],[33,35],[34,24],[35,2],[36,25]]},"77":{"car":"77","name":"Carson Hocevar","starts":36,"wins":2,"mll":0,"t5":6,"t10":6,"avg":22.19,"best":1,"worst":38,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":18.83,"Intermediate":25.85,"Short Track":22.38,"Concrete":33.5,"Road Course":7.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,28],[2,37],[3,29],[4,25],[5,38],[6,28],[7,2],[8,20],[9,13],[10,5],[11,12],[12,31],[13,35],[14,16],[15,14],[16,12],[17,32],[18,36],[19,35],[20,1],[21,32],[22,17],[23,12],[24,2],[25,29],[26,26],[27,38],[28,34],[29,32],[30,37],[31,18],[32,28],[33,23],[34,17],[35,4],[36,1]]},"43":{"car":"43","name":"Erik Jones","starts":36,"wins":0,"mll":0,"t5":3,"t10":12,"avg":21.17,"best":2,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":24.5,"Intermediate":23.69,"Short Track":16.38,"Concrete":20.5,"Road Course":18.8},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,30],[2,36],[3,6],[4,2],[5,5],[6,40],[7,19],[8,10],[9,10],[10,31],[11,31],[12,12],[13,16],[14,29],[15,20],[16,6],[17,21],[18,31],[19,14],[20,39],[21,40],[22,10],[23,37],[24,9],[25,25],[26,3],[27,28],[28,24],[29,6],[30,18],[31,7],[32,8],[33,25],[34,38],[35,37],[36,39]]},"51":{"car":"51","name":"Cody Ware","starts":36,"wins":1,"mll":1,"t5":2,"t10":6,"avg":23.56,"best":1,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":31.0,"Intermediate":20.38,"Short Track":25.12,"Concrete":16.5,"Road Course":26.0},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,39],[2,8],[3,39],[4,21],[5,10],[6,27],[7,12],[8,11],[9,20],[10,38],[11,34],[12,38],[13,34],[14,4],[15,37],[16,22],[17,34],[18,19],[19,21],[20,34],[21,7],[22,33],[23,15],[24,32],[25,30],[26,19],[27,27],[28,21],[29,10],[30,23],[31,15],[32,1],[33,33],[34,40],[35,25],[36,15]]},"7":{"car":"7","name":"Justin Haley","starts":36,"wins":0,"mll":0,"t5":6,"t10":10,"avg":17.64,"best":2,"worst":40,"regPts":560,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":20.5,"Intermediate":16.31,"Short Track":24.0,"Concrete":16.0,"Road Course":8.8},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,20],[2,17],[3,24],[4,20],[5,9],[6,23],[7,5],[8,31],[9,21],[10,33],[11,17],[12,20],[13,20],[14,26],[15,2],[16,11],[17,6],[18,27],[19,31],[20,18],[21,30],[22,11],[23,5],[24,6],[25,32],[26,40],[27,5],[28,17],[29,5],[30,14],[31,13],[32,7],[33,11],[34,18],[35,36],[36,4]]},"50":{"car":"50","name":"Burt Myers","starts":13,"wins":0,"mll":0,"t5":1,"t10":3,"avg":21.23,"best":4,"worst":36,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":9.0,"Intermediate":20.0,"Short Track":29.5,"Road Course":23.8},"trackTypeCount":{"Superspeedway":2,"Intermediate":4,"Short Track":2,"Road Course":5},"fins":[[1,4],[2,6],[3,14],[4,31],[7,22],[14,21],[15,8],[16,28],[20,36],[22,20],[23,33],[24,19],[31,34]]},"35":{"car":"35","name":"Riley Herbst","starts":36,"wins":1,"mll":1,"t5":6,"t10":10,"avg":19.67,"best":1,"worst":39,"regPts":568,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":24.17,"Intermediate":15.23,"Short Track":17.75,"Concrete":27.75,"Road Course":22.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,5],[2,26],[3,30],[4,24],[5,37],[6,26],[7,3],[8,18],[9,1],[10,17],[11,26],[12,2],[13,17],[14,10],[15,21],[16,36],[17,18],[18,37],[19,7],[20,19],[21,20],[22,2],[23,8],[24,39],[25,28],[26,39],[27,14],[28,25],[29,11],[30,35],[31,30],[32,5],[33,6],[34,23],[35,21],[36,22]]},"19":{"car":"19","name":"Chase Briscoe","starts":36,"wins":1,"mll":2,"t5":6,"t10":11,"avg":19.08,"best":1,"worst":40,"regPts":575,"finalChasePts":246,"madeChase":true,"trackTypeAvg":{"Superspeedway":18.33,"Intermediate":21.0,"Short Track":21.0,"Concrete":18.0,"Road Course":12.8},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,33],[2,1],[3,7],[4,38],[5,23],[6,5],[7,31],[8,12],[9,27],[10,39],[11,3],[12,21],[13,38],[14,40],[15,4],[16,5],[17,9],[18,25],[19,19],[20,12],[21,3],[22,12],[23,23],[24,8],[25,40],[26,32],[27,18],[28,20],[29,19],[30,11],[31,9],[32,32],[33,24],[34,22],[35,9],[36,13]]},"34":{"car":"34","name":"Todd Gilliland","starts":36,"wins":0,"mll":0,"t5":1,"t10":6,"avg":22.81,"best":3,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":19.67,"Intermediate":21.15,"Short Track":22.88,"Concrete":33.25,"Road Course":22.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,8],[2,3],[3,40],[4,40],[5,36],[6,29],[7,24],[8,40],[9,38],[10,36],[11,14],[12,6],[13,30],[14,11],[15,26],[16,18],[17,38],[18,28],[19,8],[20,17],[21,29],[22,8],[23,29],[24,22],[25,21],[26,11],[27,7],[28,16],[29,40],[30,12],[31,23],[32,18],[33,17],[34,33],[35,33],[36,12]]},"40":{"car":"40","name":"Justin Allgaier","starts":16,"wins":0,"mll":0,"t5":3,"t10":4,"avg":19.75,"best":4,"worst":39,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":30.5,"Intermediate":21.0,"Short Track":16.33,"Concrete":8.5},"trackTypeCount":{"Superspeedway":2,"Intermediate":9,"Short Track":3,"Concrete":2},"fins":[[1,26],[2,10],[3,35],[4,39],[6,4],[9,30],[12,5],[13,26],[14,28],[21,17],[27,11],[28,14],[29,13],[30,32],[32,21],[35,5]]},"54":{"car":"54","name":"Ty Gibbs","starts":36,"wins":0,"mll":0,"t5":2,"t10":4,"avg":24.39,"best":3,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":19.33,"Intermediate":26.92,"Short Track":27.38,"Concrete":18.75,"Road Course":23.6},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,19],[2,30],[3,26],[4,26],[5,15],[6,13],[7,25],[8,28],[9,35],[10,34],[11,18],[12,23],[13,36],[14,39],[15,25],[16,24],[17,13],[18,18],[19,26],[20,3],[21,6],[22,40],[23,28],[24,33],[25,23],[26,14],[27,23],[28,5],[29,29],[30,22],[31,32],[32,39],[33,31],[34,31],[35,38],[36,8]]},"01":{"car":"01","name":"Corey LaJoie","starts":9,"wins":1,"mll":0,"t5":2,"t10":3,"avg":17.11,"best":1,"worst":37,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Short Track":15.67,"Road Course":17.5,"Intermediate":17.0,"Superspeedway":1.0,"Concrete":37.0},"trackTypeCount":{"Short Track":3,"Road Course":2,"Intermediate":2,"Superspeedway":1,"Concrete":1},"fins":[[4,10],[20,11],[22,3],[24,24],[25,11],[26,1],[29,37],[32,31],[33,26]]},"21":{"car":"21","name":"Josh Berry","starts":36,"wins":1,"mll":1,"t5":4,"t10":6,"avg":21.83,"best":1,"worst":39,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":29.33,"Intermediate":18.23,"Short Track":19.12,"Concrete":29.5,"Road Course":20.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,25],[2,5],[3,28],[4,34],[5,39],[6,39],[7,10],[8,15],[9,11],[10,16],[11,21],[12,17],[13,27],[14,34],[15,30],[16,38],[17,14],[18,15],[19,9],[20,25],[21,21],[22,23],[23,36],[24,25],[25,1],[26,38],[27,24],[28,2],[29,25],[30,4],[31,12],[32,20],[33,15],[34,30],[35,24],[36,34]]},"2":{"car":"2","name":"Austin Cindric","starts":36,"wins":0,"mll":1,"t5":3,"t10":10,"avg":20.03,"best":3,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":14.33,"Intermediate":17.92,"Short Track":18.75,"Concrete":30.5,"Road Course":26.0},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,3],[2,12],[3,22],[4,32],[5,31],[6,16],[7,9],[8,34],[9,15],[10,7],[11,13],[12,16],[13,28],[14,20],[15,35],[16,8],[17,5],[18,40],[19,6],[20,30],[21,26],[22,27],[23,34],[24,31],[25,3],[26,6],[27,20],[28,8],[29,35],[30,20],[31,25],[32,11],[33,29],[34,35],[35,22],[36,7]]},"87":{"car":"87","name":"Brandon Ross","starts":36,"wins":6,"mll":3,"t5":15,"t10":20,"avg":10.53,"best":1,"worst":28,"regPts":819,"finalChasePts":380,"madeChase":true,"trackTypeAvg":{"Superspeedway":11.33,"Intermediate":6.31,"Short Track":13.0,"Concrete":9.5,"Road Course":17.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,13],[2,4],[3,3],[4,4],[5,19],[6,3],[7,16],[8,6],[9,2],[10,10],[11,24],[12,28],[13,1],[14,8],[15,22],[16,23],[17,4],[18,4],[19,1],[20,20],[21,13],[22,1],[23,1],[24,13],[25,10],[26,18],[27,22],[28,13],[29,12],[30,1],[31,16],[32,2],[33,4],[34,1],[35,28],[36,9]]},"5":{"car":"5","name":"Kyle Larson","starts":36,"wins":0,"mll":0,"t5":1,"t10":5,"avg":23.22,"best":3,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":27.83,"Intermediate":21.23,"Short Track":23.75,"Concrete":22.75,"Road Course":22.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,40],[2,35],[3,32],[4,9],[5,18],[6,31],[7,36],[8,32],[9,8],[10,14],[11,37],[12,19],[13,31],[14,17],[15,18],[16,27],[17,15],[18,14],[19,30],[20,13],[21,31],[22,35],[23,3],[24,23],[25,31],[26,20],[27,10],[28,10],[29,28],[30,30],[31,22],[32,37],[33,19],[34,11],[35,23],[36,27]]},"91":{"car":"91","name":"H\u00e9lio Castroneves","starts":10,"wins":0,"mll":0,"t5":0,"t10":2,"avg":23.6,"best":8,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":14.67,"Intermediate":25.8,"Road Course":31.0,"Short Track":32.0},"trackTypeCount":{"Superspeedway":3,"Intermediate":5,"Road Course":1,"Short Track":1},"fins":[[1,10],[3,21],[9,17],[10,37],[15,31],[17,27],[26,13],[28,40],[30,8],[33,32]]},"66":{"car":"66","name":"Josh Bilicki","starts":17,"wins":0,"mll":0,"t5":1,"t10":1,"avg":27.24,"best":2,"worst":39,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Concrete":26.5,"Road Course":22.0,"Short Track":29.25,"Intermediate":30.5,"Superspeedway":22.0},"trackTypeCount":{"Concrete":2,"Road Course":2,"Short Track":4,"Intermediate":6,"Superspeedway":3},"fins":[[6,32],[7,15],[8,37],[10,24],[11,29],[12,26],[17,37],[19,27],[21,39],[23,39],[27,21],[29,21],[31,29],[32,23],[33,27],[34,2],[36,35]]},"78":{"car":"78","name":"BJ McLeod","starts":12,"wins":0,"mll":0,"t5":0,"t10":5,"avg":18.5,"best":7,"worst":38,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Intermediate":13.5,"Concrete":29.0,"Road Course":18.67,"Short Track":12.5},"trackTypeCount":{"Intermediate":4,"Concrete":3,"Road Course":3,"Short Track":2},"fins":[[2,9],[5,30],[6,19],[9,7],[13,13],[15,10],[18,38],[20,10],[22,25],[25,7],[31,36],[35,18]]},"1":{"car":"1","name":"Ross Chastain","starts":36,"wins":1,"mll":0,"t5":8,"t10":12,"avg":17.92,"best":1,"worst":40,"regPts":603,"finalChasePts":265,"madeChase":true,"trackTypeAvg":{"Superspeedway":11.5,"Intermediate":18.46,"Short Track":16.5,"Concrete":20.5,"Road Course":24.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,6],[2,18],[3,10],[4,5],[5,17],[6,18],[7,38],[8,14],[9,5],[10,19],[11,15],[12,40],[13,37],[14,1],[15,3],[16,32],[17,30],[18,20],[19,13],[20,24],[21,22],[22,38],[23,4],[24,18],[25,6],[26,22],[27,4],[28,27],[29,27],[30,5],[31,39],[32,30],[33,12],[34,5],[35,10],[36,11]]},"48":{"car":"48","name":"Alex Bowman","starts":35,"wins":2,"mll":0,"t5":4,"t10":7,"avg":21.89,"best":1,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":20.0,"Intermediate":29.58,"Short Track":17.88,"Concrete":15.5,"Road Course":17.2},"trackTypeCount":{"Superspeedway":6,"Intermediate":12,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,22],[2,39],[3,15],[4,12],[5,20],[6,1],[7,32],[8,23],[9,25],[11,2],[12,33],[13,40],[14,32],[15,23],[16,10],[17,8],[18,26],[19,20],[20,8],[21,35],[22,31],[23,19],[24,4],[25,16],[26,25],[27,32],[28,18],[29,15],[30,40],[31,19],[32,36],[33,28],[34,37],[35,1],[36,19]]},"60":{"car":"60","name":"Ryan Preece","starts":35,"wins":1,"mll":1,"t5":3,"t10":9,"avg":19.63,"best":1,"worst":39,"regPts":567,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":21.67,"Intermediate":21.46,"Short Track":15.12,"Concrete":20.0,"Road Course":19.25},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":4},"fins":[[1,31],[2,31],[3,31],[4,11],[5,11],[6,36],[7,6],[8,22],[9,28],[10,6],[11,6],[12,39],[13,6],[14,3],[15,39],[16,2],[17,16],[18,13],[19,11],[21,16],[22,28],[23,38],[24,21],[25,9],[26,23],[27,36],[28,33],[29,20],[30,9],[31,11],[32,29],[33,1],[34,21],[35,26],[36,18]]},"71":{"car":"71","name":"Michael McDowell","starts":36,"wins":0,"mll":0,"t5":5,"t10":8,"avg":23.47,"best":3,"worst":39,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":25.0,"Intermediate":21.62,"Short Track":30.75,"Concrete":22.5,"Road Course":15.6},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,32],[2,19],[3,33],[4,3],[5,13],[6,22],[7,4],[8,39],[9,39],[10,27],[11,8],[12,37],[13,10],[14,6],[15,28],[16,35],[17,3],[18,29],[19,25],[20,23],[21,37],[22,32],[23,24],[24,3],[25,39],[26,15],[27,37],[28,28],[29,26],[30,16],[31,20],[32,3],[33,37],[34,39],[35,31],[36,23]]},"23":{"car":"23","name":"Bubba Wallace","starts":36,"wins":2,"mll":2,"t5":4,"t10":10,"avg":18.56,"best":1,"worst":38,"regPts":572,"finalChasePts":280,"madeChase":true,"trackTypeAvg":{"Superspeedway":19.33,"Intermediate":20.46,"Short Track":17.0,"Concrete":19.25,"Road Course":14.6},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,36],[2,33],[3,17],[4,14],[5,22],[6,11],[7,1],[8,9],[9,22],[10,20],[11,4],[12,25],[13,23],[14,31],[15,32],[16,15],[17,28],[18,22],[19,18],[20,7],[21,15],[22,19],[23,10],[24,29],[25,38],[26,7],[27,1],[28,37],[29,22],[30,15],[31,4],[32,12],[33,10],[34,16],[35,7],[36,36]]},"16":{"car":"16","name":"AJ Allmendinger","starts":36,"wins":0,"mll":1,"t5":1,"t10":8,"avg":23.11,"best":5,"worst":39,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":30.0,"Intermediate":18.15,"Short Track":25.5,"Concrete":26.75,"Road Course":21.0},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,37],[2,7],[3,27],[4,35],[5,24],[6,15],[7,20],[8,26],[9,33],[10,26],[11,39],[12,10],[13,8],[14,7],[15,5],[16,25],[17,31],[18,32],[19,23],[20,6],[21,11],[22,14],[23,22],[24,36],[25,33],[26,37],[27,33],[28,23],[29,36],[30,7],[31,38],[32,14],[33,22],[34,7],[35,30],[36,33]]},"41":{"car":"41","name":"Cole Custer","starts":36,"wins":3,"mll":4,"t5":9,"t10":14,"avg":17.28,"best":1,"worst":40,"regPts":690,"finalChasePts":276,"madeChase":true,"trackTypeAvg":{"Superspeedway":14.33,"Intermediate":22.85,"Short Track":16.25,"Concrete":11.25,"Road Course":12.8},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,9],[2,25],[3,13],[4,8],[5,1],[6,17],[7,26],[8,38],[9,40],[10,2],[11,35],[12,1],[13,12],[14,35],[15,1],[16,17],[17,23],[18,23],[19,4],[20,2],[21,36],[22,36],[23,14],[24,7],[25,18],[26,2],[27,12],[28,39],[29,4],[30,19],[31,28],[32,4],[33,36],[34,6],[35,8],[36,21]]},"38":{"car":"38","name":"Zane Smith","starts":36,"wins":0,"mll":1,"t5":4,"t10":9,"avg":19.72,"best":2,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":19.5,"Intermediate":17.15,"Short Track":21.25,"Concrete":22.75,"Road Course":21.8},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,11],[2,32],[3,2],[4,33],[5,26],[6,8],[7,40],[8,3],[9,14],[10,32],[11,33],[12,24],[13,2],[14,19],[15,38],[16,26],[17,29],[18,33],[19,33],[20,15],[21,18],[22,6],[23,16],[24,11],[25,8],[26,21],[27,13],[28,12],[29,24],[30,21],[31,5],[32,9],[33,8],[34,13],[35,35],[36,37]]},"4":{"car":"4","name":"Noah Gragson","starts":36,"wins":0,"mll":0,"t5":5,"t10":8,"avg":19.44,"best":2,"worst":40,"regPts":595,"finalChasePts":194,"madeChase":true,"trackTypeAvg":{"Superspeedway":8.0,"Intermediate":20.31,"Short Track":23.25,"Concrete":25.0,"Road Course":20.4},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,2],[2,11],[3,11],[4,15],[5,25],[6,33],[7,13],[8,17],[9,16],[10,21],[11,7],[12,3],[13,7],[14,37],[15,9],[16,16],[17,19],[18,12],[19,40],[20,33],[21,14],[22,24],[23,32],[24,14],[25,34],[26,4],[27,3],[28,29],[29,30],[30,34],[31,33],[32,17],[33,34],[34,19],[35,27],[36,5]]},"22":{"car":"22","name":"Joey Logano","starts":35,"wins":0,"mll":0,"t5":2,"t10":6,"avg":21.77,"best":3,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":28.17,"Intermediate":25.25,"Short Track":19.38,"Concrete":13.0,"Road Course":16.6},"trackTypeCount":{"Superspeedway":6,"Intermediate":12,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,34],[2,28],[3,12],[4,36],[5,14],[6,14],[7,7],[8,25],[9,6],[10,35],[11,40],[12,18],[13,22],[14,24],[15,36],[16,13],[17,22],[18,16],[19,28],[20,4],[21,34],[22,21],[23,40],[24,15],[25,19],[26,29],[28,6],[29,8],[30,38],[31,21],[32,27],[33,13],[34,25],[35,3],[36,29]]},"10":{"car":"10","name":"Ty Dillon","starts":36,"wins":0,"mll":0,"t5":3,"t10":7,"avg":20.44,"best":2,"worst":40,"regPts":null,"finalChasePts":null,"madeChase":false,"trackTypeAvg":{"Superspeedway":15.83,"Intermediate":22.31,"Short Track":23.25,"Concrete":15.25,"Road Course":20.8},"trackTypeCount":{"Superspeedway":6,"Intermediate":13,"Short Track":8,"Concrete":4,"Road Course":5},"fins":[[1,12],[2,40],[3,19],[4,37],[5,3],[6,12],[7,35],[8,19],[9,36],[10,29],[11,25],[12,30],[13,15],[14,12],[15,15],[16,4],[17,12],[18,39],[19,17],[20,31],[21,19],[22,39],[23,6],[24,17],[25,26],[26,17],[27,17],[28,7],[29,7],[30,25],[31,6],[32,33],[33,21],[34,20],[35,32],[36,2]]}}}},"meta":{"careerNotes":{"27":["Season 1 Champion","Regular-Season Champion"],"15":["Season 1 Runner-Up"],"7":["Season 1 People's Champ"],"41":["Season 1 Best CPU"]},"teams":{"1":"Trackhouse Racing","2":"Team Penske","3":"Richard Childress Racing","4":"Front Row Motorsports","5":"Hendrick Motorsports","6":"RFK Racing","7":"Spire Motorsports","8":"Richard Childress Racing","9":"Hendrick Motorsports","10":"Kaulig Racing","11":"Joe Gibbs Racing","12":"Team Penske","13":"Trips B Racing","15":"Trips B Racing","16":"Kaulig Racing","17":"RFK Racing","19":"Joe Gibbs Racing","20":"Joe Gibbs Racing","21":"Wood Brothers Racing","22":"Team Penske","23":"23XI Racing","24":"Hendrick Motorsports","27":"Trips B Racing","34":"Front Row Motorsports","35":"23XI Racing","38":"Front Row Motorsports","40":"JR Motorsports","41":"Haas Factory Team","42":"Legacy Motor Club","43":"Legacy Motor Club","44":"NY Racing Team","45":"23XI Racing","47":"Hyak Motorsports","48":"Hendrick Motorsports","50":"Independent","51":"Rick Ware Racing","54":"Joe Gibbs Racing","56":"Independent","60":"RFK Racing","66":"Garage 66","71":"Spire Motorsports","77":"Spire Motorsports","78":"Live Fast Motorsports","84":"Legacy Motor Club","87":"Trackhouse Racing","88":"Trackhouse Racing","91":"Trackhouse Racing","99":"Trackhouse Racing","01":"Rick Ware Racing"},"trackType":{"Daytona":"Superspeedway","Talladega":"Superspeedway","EchoPark":"Superspeedway","Atlanta":"Superspeedway","Las Vegas":"Intermediate","Texas":"Intermediate","Kansas":"Intermediate","Charlotte":"Intermediate","Darlington":"Intermediate","Michigan":"Intermediate","Pocono":"Intermediate","Indianapolis":"Intermediate","Indy":"Intermediate","Gateway":"Intermediate","Homestead":"Intermediate","Phoenix":"Short Track","Richmond":"Short Track","Martinsville":"Short Track","New Hampshire":"Short Track","Iowa":"Short Track","COTA":"Road Course","Sonoma":"Road Course","Watkins Glen":"Road Course","Chicago Street Course":"Road Course","Chicago":"Road Course","Bristol":"Concrete","Dover":"Concrete","Nashville":"Concrete"},"s1PidMap":{"87":"27","24":"15"}},"ratingsHistory":[{"label":"After R5","race":5,"all":{"34":53,"17":81,"51":55,"38":63,"12":68,"5":47,"16":52,"41":92,"35":73,"66":42,"13":40,"19":78,"23":83,"20":77,"01":79,"54":45,"8":43,"3":69,"87":44,"6":91,"21":62,"88":79,"47":56,"44":46,"15":97,"43":60,"42":43,"22":53,"84":54,"50":51,"48":65,"99":61,"60":70,"71":51,"7":76,"56":36,"40":60,"24":56,"2":62,"91":40,"4":66,"1":87,"45":82,"9":67,"11":70,"78":58,"27":99,"77":67,"10":61},"s2":{"27":97,"77":79,"41":69,"6":81,"17":87,"43":58,"8":53,"9":74,"15":96,"34":95,"60":47,"19":50,"21":68,"10":73,"3":67,"48":74,"23":73,"11":60,"12":92,"51":71,"88":68,"99":42,"45":49,"5":62,"71":46,"22":63,"87":44,"24":56,"1":85,"38":52,"7":51,"35":53,"16":81,"54":70,"20":60,"42":73,"2":61,"47":45,"4":48,"13":40,"66":61,"44":65,"40":62,"78":40}},{"label":"After R10","race":10,"all":{"34":57,"17":80,"51":56,"38":63,"12":70,"5":53,"16":56,"41":89,"35":75,"66":39,"13":40,"19":79,"23":80,"20":74,"01":69,"54":46,"8":45,"3":66,"87":40,"6":91,"21":61,"88":75,"47":54,"44":50,"15":97,"43":58,"42":45,"22":56,"50":58,"84":54,"48":68,"99":59,"60":69,"71":52,"7":74,"56":36,"40":61,"24":75,"2":60,"91":40,"4":64,"1":85,"45":79,"9":68,"11":67,"78":58,"27":98,"77":70,"10":61},"s2":{"27":96,"77":87,"41":68,"6":89,"17":79,"43":53,"8":54,"9":77,"15":99,"34":94,"60":55,"19":66,"21":60,"10":70,"3":53,"48":83,"23":67,"11":53,"12":88,"51":65,"88":53,"99":43,"45":49,"5":81,"71":51,"22":68,"87":40,"24":75,"1":78,"38":58,"7":55,"35":70,"16":84,"54":59,"20":57,"42":68,"2":54,"47":41,"4":47,"13":40,"66":43,"44":64,"40":62,"78":48,"50":66,"01":60}},{"label":"After R15","race":15,"all":{"34":60,"17":80,"51":62,"38":64,"12":70,"5":54,"16":55,"41":94,"35":74,"66":40,"13":40,"19":77,"23":75,"20":72,"01":55,"54":48,"8":52,"3":67,"87":38,"6":91,"21":59,"88":70,"47":56,"44":52,"15":97,"43":56,"42":47,"22":54,"50":58,"84":64,"48":69,"99":59,"60":70,"71":52,"7":72,"56":47,"40":60,"24":76,"2":62,"91":40,"4":64,"1":86,"45":77,"9":69,"11":65,"78":55,"27":98,"77":69,"10":59},"s2":{"27":96,"77":80,"41":90,"6":90,"17":79,"43":46,"8":75,"9":77,"15":98,"34":91,"60":63,"19":65,"21":55,"10":60,"3":63,"48":81,"23":52,"11":52,"12":83,"51":85,"88":44,"99":48,"45":52,"5":77,"71":52,"22":58,"87":38,"24":76,"1":83,"38":62,"7":55,"35":70,"16":73,"54":61,"20":54,"42":66,"2":62,"47":52,"4":51,"13":40,"66":44,"44":63,"40":61,"78":46,"50":64,"01":40,"84":71,"56":53}},{"label":"After R20","race":20,"all":{"34":62,"17":80,"51":66,"38":61,"12":74,"5":54,"16":56,"41":93,"35":71,"66":40,"13":40,"19":73,"23":73,"20":72,"01":51,"54":48,"8":56,"3":64,"87":55,"6":91,"21":64,"88":68,"47":57,"44":53,"15":97,"43":56,"42":46,"22":59,"50":58,"84":65,"48":69,"99":58,"60":73,"71":55,"7":69,"56":49,"40":60,"24":78,"2":70,"91":37,"4":63,"1":84,"45":80,"9":68,"11":65,"78":50,"27":99,"77":69,"10":56},"s2":{"27":98,"77":75,"41":89,"6":89,"17":81,"43":49,"8":80,"9":71,"15":97,"34":88,"60":73,"19":57,"21":69,"10":50,"3":54,"48":78,"23":54,"11":53,"12":89,"51":88,"88":44,"99":48,"45":66,"5":69,"71":60,"22":70,"87":55,"24":78,"1":79,"38":55,"7":50,"35":63,"16":70,"54":58,"20":59,"42":58,"2":83,"47":54,"4":52,"13":40,"66":42,"44":62,"40":60,"78":40,"50":63,"01":39,"84":70,"56":55,"91":36}}]};
+const STORAGE_KEY = "tbcs-payload";
+const MFR_COLOR = { CHEVY: "#FFC933", FORD: "#2A6BE0", TOYOTA: "#E4002B" };
+const mfrColor = (m) => MFR_COLOR[m] || "#8A9099";
+const TYPE_ORDER = ["Superspeedway", "Intermediate", "Short Track", "Concrete", "Road Course"];
+const C = {
+bg: "#0A0A0B", panel: "#131518", panel2: "#1A1D21", line: "#26292E",
+text: "#F5F3EE", muted: "#8A9099", gold: "#FFC933", green: "#00913F",
+greenBright: "#2EC25E", red: "#E4402F",
+};
+function deepMerge(base, patch) {
+if (Array.isArray(patch) || patch === null || typeof patch !== "object") return patch;
+const out = (base && typeof base === "object" && !Array.isArray(base)) ? { ...base } : {};
+for (const k of Object.keys(patch)) out[k] = deepMerge(out[k], patch[k]);
+return out;
+}
+const TIER = (o) => o>=95?{k:"PLATINUM",c:"#7FE3E0",t:"#062B2A"}:o>=85?{k:"GOLD",c:"#FFC933",t:"#111"}:o>=75?{k:"SILVER",c:"#C7CDD6",t:"#111"}:o>=65?{k:"BRONZE",c:"#C8813C",t:"#fff"}:{k:"",c:"#2A2F35",t:"#8A9099"};
+const TYPE_ABBR = { "Superspeedway":"SS", "Intermediate":"INT", "Short Track":"ST", "Concrete":"CON", "Road Course":"RC" };
+function _pctile(vals){const xs=[...vals].sort((a,b)=>a-b);const n=vals.length;return vals.map(v=>{let b=0,e=0;for(const x of xs){if(x<v)b++;else if(x===v)e++;}return n>1?(b+(e-1)/2)/(n-1):0.5;});}
+const _ov = (c)=>Math.round(30+c*69);
+function _trackRatings(source){
+const byType={};
+Object.keys(source).forEach(pid=>{const m=source[pid]||{};Object.keys(m).forEach(t=>{(byType[t]=byType[t]||[]).push([pid,m[t]]);});});
+const out={};
+Object.keys(byType).forEach(t=>{const arr=byType[t];const ps=_pctile(arr.map(x=>-x[1]));arr.forEach((x,i)=>{(out[x[0]]=out[x[0]]||{})[t]=_ov(ps[i]);});});
+return out;
+}
+function computeRatings(registry, s2count){
+const pids=Object.keys(registry);
+const s1p=pids.filter(pid=>registry[pid].s1);
+const P1a=_pctile(s1p.map(pid=>-registry[pid].s1.profile.avg));
+const P1w=_pctile(s1p.map(pid=>registry[pid].s1.profile.wins));
+const P1f=_pctile(s1p.map(pid=>registry[pid].s1.profile.t5));
+const P1t=_pctile(s1p.map(pid=>registry[pid].s1.profile.t10));
+const s1ov={}; s1p.forEach((pid,i)=>{s1ov[pid]=_ov(0.50*P1a[i]+0.25*P1w[i]+0.15*P1f[i]+0.10*P1t[i]);});
+const s2p=pids.filter(pid=>registry[pid].s2);
+const G=(pid)=>registry[pid].s2.agg;
+const P2a=_pctile(s2p.map(pid=>-G(pid).avg));
+const P2w=_pctile(s2p.map(pid=>G(pid).raceW));
+const P2f=_pctile(s2p.map(pid=>G(pid).t5));
+const P2t=_pctile(s2p.map(pid=>G(pid).t10));
+const P2p=_pctile(s2p.map(pid=>G(pid).pts));
+const s2ov={}; s2p.forEach((pid,i)=>{s2ov[pid]=_ov(0.38*P2a[i]+0.25*P2p[i]+0.20*P2w[i]+0.10*P2f[i]+0.07*P2t[i]);});
+const allov={};
+pids.forEach(pid=>{const r=registry[pid];const a=r.s1?s1ov[pid]:null;const b=r.s2?s2ov[pid]:null;
+if(a!=null&&b!=null){const sa=r.s1.profile.starts||1,sb=s2count||16;allov[pid]=Math.round((a*sa+b*sb)/(sa+sb));}
+else allov[pid]=a!=null?a:(b!=null?b:50);});
+const s1src={},s2src={},allsrc={};
+pids.forEach(pid=>{const r=registry[pid];if(r.s1)s1src[pid]=r.s1.profile.trackTypeAvg;if(r.s2)s2src[pid]=r.s2.trackAvg;allsrc[pid]=r.combinedTrackAvg;});
+return {"1":{overall:s1ov,track:_trackRatings(s1src)},"2":{overall:s2ov,track:_trackRatings(s2src)},all:{overall:allov,track:_trackRatings(allsrc)}};
+}
+function TierBadge({ overall, size }) {
+if (overall == null) return null;
+const t = TIER(overall); const big = size === "lg";
+return (<div style={{ display:"inline-flex", alignItems:"center", gap:6, background:t.c, color:t.t, borderRadius:10, padding: big?"6px 12px":"3px 9px", border:"1px solid rgba(0,0,0,0.25)", boxShadow:"0 1px 3px rgba(0,0,0,0.35)" }}>
+<span className="tbcs-font-display" style={{ fontSize: big?26:15, fontWeight:700, fontStyle:"italic", lineHeight:1 }}>{overall}</span>
+{t.k && <span className="tbcs-font-body" style={{ fontSize: big?10:8.5, fontWeight:700, letterSpacing:"0.08em" }}>{t.k}</span>}
+</div>);
+}
+function ShieldCrest({ overall, size }) {
+if (overall == null) return null;
+const t = TIER(overall); const w = size || 60; const h = w * 1.14;
+return (
+<div style={{ position: "relative", width: w, height: h, filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }}>
+<svg viewBox="0 0 60 68" width={w} height={h} style={{ position: "absolute", inset: 0 }}>
+<path d="M30 2 L56 10 V34 C56 50 44 60 30 66 C16 60 4 50 4 34 V10 Z" fill={t.c} stroke="rgba(255,255,255,0.35)" strokeWidth="2" />
+<path d="M30 8 L50 14 V34 C50 46 41 54 30 59 C19 54 10 46 10 34 V14 Z" fill="none" stroke="rgba(0,0,0,0.18)" strokeWidth="1.5" />
+</svg>
+<div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingBottom: h*0.06 }}>
+<span className="tbcs-font-display" style={{ fontSize: w*0.42, fontWeight: 700, fontStyle: "italic", color: t.t, lineHeight: 1 }}>{overall}</span>
+<span className="tbcs-font-body" style={{ fontSize: w*0.13, fontWeight: 700, letterSpacing: "0.06em", color: t.t, opacity: 0.85 }}>OVR</span>
+</div>
+</div>
+);
+}
+function RatingChips({ track }) {
+if (!track) return null;
+const order = TYPE_ORDER.filter(t => track[t] !== undefined);
+if (order.length === 0) return <div style={{ fontSize:11, color:C.muted }}>No track ratings yet.</div>;
+return (<div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+{order.map(t => { const o=track[t]; const ti=TIER(o);
+return (<div key={t} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:3, minWidth:52, background:C.panel2, border:`1px solid ${C.line}`, borderRadius:9, padding:"7px 4px" }}>
+<span className="tbcs-font-body" style={{ fontSize:9, color:C.muted, fontWeight:700, letterSpacing:"0.04em" }}>{TYPE_ABBR[t]}</span>
+<span className="tbcs-font-display" style={{ fontSize:17, fontWeight:700, color:ti.k?ti.c:C.text }}>{o}</span>
+</div>);
+})}
+</div>);
+}
+function s1RaceLog(profile, data) {
+const idx = ((data.seasons["1"] || {}).index) || [];
+const byRace = {}; idx.forEach(r => { byRace[r.race] = r; });
+const car = profile.car;
+return (profile.fins || []).map(([race, pos]) => {
+const r = byRace[race] || {};
+return { race, track: r.track || ("R" + race), type: r.type || "Intermediate", pos, win: pos === 1, mll: r.mll === car };
+});
+}
+function buildRegistry(data) {
+const S = data.seasons || {}; const meta = data.meta || {};
+const tt = (t) => (meta.trackType && meta.trackType[(t || "").trim()]) || "Intermediate";
+const s1 = S["1"] || {}; const s2 = S["2"] || {};
+const s1prof = s1.profiles || {}; const s1cmap = s1.colorMap || {};
+const s2byCar = {}; (s2.drivers || []).forEach(d => { s2byCar[d.car] = d; });
+const pidOf = (car) => (meta.s1PidMap && meta.s1PidMap[car]) || car;
+const avgOf = (arr) => Math.round(arr.reduce((a, b) => a + b, 0) / arr.length * 100) / 100;
+const s1standByPid = {}; (s1.standings || []).forEach(row => { s1standByPid[row.pid || pidOf(row.car)] = row; });
+const s2finish = {};
+const fo = s2.fullOrders || {};
+Object.keys(fo).forEach(k => {
+const rn = parseInt(k, 10); const track = (s2.tracks || [])[rn - 1]; const type = tt(track);
+fo[k].forEach((car, i) => { (s2finish[car] = s2finish[car] || []).push({ race: rn, track, type, pos: i + 1 }); });
+});
+const s2high = {};
+for (let rn = 1; rn <= (s2.tracks || []).length; rn++) {
+const track = s2.tracks[rn - 1]; const w = (s2.winners || [])[rn - 1]; const m = (s2.mll || [])[rn - 1]; const st = (s2.stages || [])[rn - 1] || {};
+const add = (car, ev) => { if (!car) return; (s2high[car] = s2high[car] || []).push({ race: rn, track, ev }); };
+if (w) add(w, "Win"); if (m) add(m, "MLL");
+["s1", "s2", "s3"].forEach((kk, si) => { (st[kk] || []).slice(0, 3).forEach((car, idx) => add(car, "S" + (si + 1) + " P" + (idx + 1))); });
+}
+const pids = new Set();
+(s2.drivers || []).forEach(d => pids.add(d.car));
+Object.keys(s1prof).forEach(car => pids.add(pidOf(car)));
+const reg = {};
+pids.forEach(pid => {
+const s2d = s2byCar[pid];
+let s1car = null;
+if (pid === "27") s1car = "87";
+else if (pid === "15") s1car = "24";
+else if (pid === "87" || pid === "24") s1car = null;
+else if (s1prof[pid]) s1car = pid;
+const sp = s1car ? s1prof[s1car] : null;
+const name = s2d ? s2d.name : (sp ? sp.name : "#" + pid);
+const mfr = s2d ? s2d.manufacturer : "—";
+let colors = null;
+if (s2d) colors = { primary: s2d.primary, number: s2d.number, plate: !!s2d.plate, grad: s2d.cardGradient || [s2d.primary, s2d.secondary] };
+else if (s1car && s1cmap[s1car]) { const c = s1cmap[s1car]; colors = { primary: c.primary, number: c.number, plate: !!c.plate, grad: c.grad }; }
+let s1colors = null;
+if (s1car && s1cmap[s1car]) { const c = s1cmap[s1car]; s1colors = { primary: c.primary, number: c.number, plate: !!c.plate, grad: c.grad }; }
+const buckets = {};
+if (sp) s1RaceLog(sp, data).forEach(x => { (buckets[x.type] = buckets[x.type] || []).push(x.pos); });
+(s2finish[pid] || []).forEach(x => { (buckets[x.type] = buckets[x.type] || []).push(x.pos); });
+const cavg = {}, ccnt = {};
+Object.keys(buckets).forEach(k => { cavg[k] = avgOf(buckets[k]); ccnt[k] = buckets[k].length; });
+const entry = { pid, name, team: (meta.teams || {})[pid] || null, mfr, notes: (meta.careerNotes || {})[pid] || [], colors, combinedTrackAvg: cavg, combinedTrackCount: ccnt };
+const seasonHistory = [];
+const s1row = s1standByPid[pid];
+if (s1row) seasonHistory.push({ season: "1", rank: s1row.rank, pts: s1row.pts, wins: s1row.wins, complete: !!s1.complete });
+entry.seasonHistory = seasonHistory;
+if (sp) entry.s1 = { car: s1car, colors: s1colors, profile: sp };
+if (s2d) {
+const s2avg = {};
+(s2finish[pid] || []).forEach(x => { (s2avg[x.type] = s2avg[x.type] || []).push(x.pos); });
+const ta = {}, tc = {};
+Object.keys(s2avg).forEach(k => { ta[k] = avgOf(s2avg[k]); tc[k] = s2avg[k].length; });
+entry.s2 = { car: pid, colors, agg: { rank: s2d.rank, pts: s2d.pts, raceW: s2d.raceW, stageW: s2d.stageW, t5: s2d.t5, t10: s2d.t10, avg: s2d.avg, sp: s2d.sp, mll: s2d.mll }, highlights: s2high[pid] || [], finishes: s2finish[pid] || [], trackAvg: ta, trackCount: tc };
+}
+reg[pid] = entry;
+});
+return reg;
+}
+const GlobalStyle = () => (
+<style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+    .tbcs-font-display { font-family: 'Oswald', sans-serif; }
+    .tbcs-font-body { font-family: 'Inter', sans-serif; }
+    .tbcs-font-mono { font-family: 'IBM Plex Mono', monospace; }
+    .tbcs-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+    .tbcs-scrollbar::-webkit-scrollbar-thumb { background: #3A3F44; border-radius: 4px; }
+    input[type=range].tbcs-slider { -webkit-appearance: none; height: 6px; border-radius: 999px; background: #2A2F35; }
+    input[type=range].tbcs-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 999px; background: #fff; border: 3px solid #FFC933; cursor: pointer; }
+  `}</style>
+);
+function CheckeredBar() {
+return (<div style={{ height: 12, width: "100%", backgroundColor: "#fff",
+backgroundImage: "linear-gradient(45deg,#000 25%,transparent 25%),linear-gradient(-45deg,#000 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#000 75%),linear-gradient(-45deg,transparent 75%,#000 75%)",
+backgroundSize: "16px 16px", backgroundPosition: "0 0,0 8px,8px -8px,-8px 0px" }} />);
+}
+function CheckerFlag({ size = 11 }) {
+return (<span style={{ display: "inline-block", width: size, height: size, borderRadius: 2, backgroundColor: "#fff",
+backgroundImage: "linear-gradient(45deg,#111 25%,transparent 25%),linear-gradient(-45deg,#111 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#111 75%),linear-gradient(-45deg,transparent 75%,#111 75%)",
+backgroundSize: `${size/2}px ${size/2}px`, backgroundPosition: `0 0,0 ${size/4}px,${size/4}px -${size/4}px,-${size/4}px 0px`,
+border: "1px solid rgba(255,255,255,0.35)", verticalAlign: "middle" }} />);
+}
+function WinFlags({ count }) {
+if (!count) return null;
+return (<span style={{ display: "inline-flex", alignItems: "center", gap: 2 }}><CheckerFlag size={11} />
+<span className="tbcs-font-mono" style={{ fontSize: 11, color: C.text, fontWeight: 700 }}>{count}</span></span>);
+}
+function NumberChip({ car, primary, number, plate, size = "md" }) {
+const dims = size === "lg" ? { w: 64, h: 64, fs: 26 } : size === "sm" ? { w: 34, h: 34, fs: 14 } : { w: 46, h: 46, fs: 18 };
+const bg = plate ? "#FFFFFF" : primary;
+const textColor = plate ? primary : number;
+return (<div className="tbcs-font-display flex items-center justify-center shrink-0" style={{
+width: dims.w, height: dims.h, background: bg, border: `2px solid rgba(255,255,255,0.15)`, borderRadius: 10,
+color: textColor, fontWeight: 700, fontSize: dims.fs, fontStyle: "italic",
+boxShadow: "inset 0 2px 3px rgba(255,255,255,0.2), inset 0 -3px 5px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.45)",
+letterSpacing: "-0.5px" }}>{car}</div>);
+}
+function MfrTag({ m }) {
+const col = mfrColor(m);
+return (<span className="tbcs-font-body" style={{ background: col, color: "#fff", border: `1px solid rgba(0,0,0,0.25)`,
+fontSize: 10.5, fontWeight: 700, padding: "2px 7px", borderRadius: 6, textTransform: "uppercase",
+letterSpacing: "0.04em", textShadow: "0 1px 1px rgba(0,0,0,0.45)" }}>{m}</span>);
+}
+function Tag({ children, tone = "default" }) {
+const tones = {
+default: { bg: C.panel2, fg: C.muted, bd: C.line },
+gold: { bg: "rgba(255,201,51,0.16)", fg: C.gold, bd: "rgba(255,201,51,0.5)" },
+green: { bg: "rgba(46,194,94,0.16)", fg: C.greenBright, bd: "rgba(46,194,94,0.45)" },
+};
+const t = tones[tone];
+return (<span className="tbcs-font-body" style={{ background: t.bg, color: t.fg, border: `1px solid ${t.bd}`,
+fontSize: 10.5, fontWeight: 700, padding: "2px 7px", borderRadius: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>{children}</span>);
+}
+function StatCard({ car, primary, number, plate, label, value, sub, subColor }) {
+return (<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: "12px 14px", display: "flex", gap: 10, alignItems: "center", minWidth: 0 }}>
+{car ? <NumberChip car={car} primary={primary} number={number} plate={plate} size="sm" /> : <div style={{ width: 34, height: 34 }} />}
+<div style={{ minWidth: 0 }}>
+<div className="tbcs-font-body" style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>{label}</div>
+<div className="tbcs-font-display" style={{ color: C.text, fontSize: 15.5, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{value}</div>
+{sub && <div className="tbcs-font-body" style={{ color: subColor || C.muted, fontSize: 11.5, marginTop: 1, fontWeight: subColor ? 700 : 400 }}>{sub}</div>}
+</div>
+</div>);
+}
+function TrackTypeBars({ trackTypeAvg, trackTypeCount }) {
+const entries = TYPE_ORDER.filter(t => trackTypeAvg && trackTypeAvg[t] !== undefined);
+if (entries.length === 0) return <div style={{ fontSize: 12, color: C.muted }}>No track-type data yet.</div>;
+const strength = (avg) => Math.max(0.04, Math.min(1, (41 - avg) / 40));
+const barColor = (avg) => avg <= 10 ? C.greenBright : avg <= 18 ? C.gold : avg <= 26 ? "#E8913C" : C.red;
+return (<div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+{entries.map(t => {
+const avg = trackTypeAvg[t]; const cnt = trackTypeCount ? trackTypeCount[t] : null;
+return (<div key={t}>
+<div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, marginBottom: 3 }}>
+<span style={{ color: C.text, fontWeight: 600 }}>{t}{cnt ? ` · ${cnt}` : ""}</span>
+<span className="tbcs-font-mono" style={{ color: C.muted }}>avg {avg.toFixed(1)}</span>
+</div>
+<div style={{ height: 8, background: C.panel2, borderRadius: 999, overflow: "hidden" }}>
+<div style={{ height: "100%", width: `${strength(avg) * 100}%`, background: barColor(avg), borderRadius: 999 }} />
+</div>
+</div>);
+})}
+</div>);
+}
+function StatGrid({ pairs }) {
+return (<div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 14 }}>
+{pairs.map(([l, v]) => (
+<div key={l} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, padding: "8px 6px", textAlign: "center" }}>
+<div style={{ fontSize: 9.5, color: C.muted, textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: 700 }}>{l}</div>
+<div className="tbcs-font-mono" style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{v}</div>
+</div>
+))}
+</div>);
+}
+function S1Body({ profile, data, seasonRank }) {
+const p = profile;
+const _log = s1RaceLog(p, data);
+const strong = [...TYPE_ORDER].filter(t => p.trackTypeAvg && p.trackTypeAvg[t] !== undefined).sort((a, b) => p.trackTypeAvg[a] - p.trackTypeAvg[b]);
+return (<div>
+<StatGrid pairs={[["Rank", seasonRank ? "P" + seasonRank : "—"], ["Starts", p.starts], ["Wins", p.wins], ["Top 5", p.t5], ["Top 10", p.t10], ["Avg", p.avg.toFixed(1)], ["Best", "P" + p.best], ["Worst", "P" + p.worst], ["MLL", p.mll]]} />
+{(p.regPts || p.finalChasePts) && (<div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+{p.regPts && <Tag tone="gold">Reg. Season: {p.regPts} pts</Tag>}
+{p.madeChase && <Tag tone="green">Made the Chase</Tag>}
+{p.finalChasePts && <Tag tone="green">Final Chase: {p.finalChasePts} pts</Tag>}
+</div>)}
+<div className="tbcs-font-display" style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Season 1 Track Strengths</div>
+<div style={{ fontSize: 11.5, color: C.muted, marginBottom: 10 }}>Strongest on <b style={{ color: C.greenBright }}>{strong[0]}</b>{strong.length > 1 ? <> · weakest on <b style={{ color: C.red }}>{strong[strong.length - 1]}</b></> : null}.</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: 12, marginBottom: 16 }}>
+<TrackTypeBars trackTypeAvg={p.trackTypeAvg} trackTypeCount={p.trackTypeCount} />
+</div>
+<div className="tbcs-font-display" style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Season 1 Race Log</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden" }}>
+{_log.map((x, i) => (<div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", borderBottom: `1px solid ${C.line}`, fontSize: 12 }}>
+<div className="tbcs-font-mono" style={{ width: 30, color: C.muted }}>R{x.race}</div>
+<div style={{ flex: 1, color: C.text }}>{x.track}</div>
+<div style={{ fontSize: 10, color: C.muted }}>{x.type}</div>
+<div className="tbcs-font-mono" style={{ width: 34, textAlign: "right", fontWeight: 700, color: x.win ? C.gold : x.pos <= 5 ? C.greenBright : C.text }}>P{x.pos}</div>
+{x.win && <CheckerFlag size={11} />}{x.mll && <Zap size={12} color={C.gold} />}
+</div>))}
+</div>
+</div>);
+}
+function S2Body({ s2, tracks, data }) {
+const a = s2.agg;
+const finMap = {}; (s2.finishes || []).forEach(f => { finMap[f.race] = f; });
+const tt = (t) => ((data.meta && data.meta.trackType && data.meta.trackType[(t || "").trim()]) || "Intermediate");
+const strong = [...TYPE_ORDER].filter(t => s2.trackAvg && s2.trackAvg[t] !== undefined).sort((x, y) => s2.trackAvg[x] - s2.trackAvg[y]);
+return (<div>
+<StatGrid pairs={[["Rank", "P" + a.rank], ["Points", a.pts], ["Wins", a.raceW], ["Stage W", a.stageW], ["Top 5", a.t5], ["Top 10", a.t10], ["Avg", a.avg.toFixed(1)], ["Stage Pts", a.sp]]} />
+<div className="tbcs-font-display" style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Season 2 Track Strengths</div>
+{strong.length > 0 ? (<>
+<div style={{ fontSize: 11.5, color: C.muted, marginBottom: 10 }}>Best so far on <b style={{ color: C.greenBright }}>{strong[0]}</b>. Fills in as each race is logged in full.</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: 12, marginBottom: 16 }}><TrackTypeBars trackTypeAvg={s2.trackAvg} trackTypeCount={s2.trackCount} /></div>
+</>) : (<div style={{ fontSize: 11.5, color: C.muted, marginBottom: 14 }}>Track-type detail builds as full race results are logged.</div>)}
+<div className="tbcs-font-display" style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Season 2 Race Log</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden" }}>
+{tracks.map((track, i) => {
+const rn = i + 1; const fin = finMap[rn];
+const hs = (s2.highlights || []).filter(h => h.race === rn).map(h => h.ev);
+const isWin = hs.indexOf("Win") !== -1;
+const isMll = hs.indexOf("MLL") !== -1;
+const pos = fin ? fin.pos : (isWin ? 1 : null);
+return (<div key={rn} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 12px", borderBottom: `1px solid ${C.line}`, fontSize: 12 }}>
+<div className="tbcs-font-mono" style={{ width: 30, color: C.muted }}>R{rn}</div>
+<div style={{ flex: 1, color: C.text }}>{track}</div>
+<div style={{ fontSize: 10, color: C.muted }}>{tt(track)}</div>
+{pos != null
+? <div className="tbcs-font-mono" style={{ width: 34, textAlign: "right", fontWeight: 700, color: pos === 1 ? C.gold : pos <= 5 ? C.greenBright : C.text }}>P{pos}</div>
+: <div className="tbcs-font-mono" style={{ width: 34, textAlign: "right", color: "#4A4F55", fontSize: 11 }}>—</div>}
+{isWin && <CheckerFlag size={11} />}
+{isMll && <Zap size={12} color={C.gold} />}
+</div>);
+})}
+</div>
+<div style={{ fontSize: 10.5, color: C.muted, fontStyle: "italic", marginTop: 8 }}>Positions shown for races logged in full (R15–R16) plus every race win. A "—" means that race's full running order hasn't been entered yet.</div>
+</div>);
+}
+function DriverModal({ pid, registry, ratings, data, initialSeason, onClose }) {
+const reg = registry[pid];
+const seasonsAvail = [];
+if (reg && reg.s2) seasonsAvail.push("2");
+if (reg && reg.s1) seasonsAvail.push("1");
+const [seasonView, setSeasonView] = useState(seasonsAvail.includes(initialSeason) ? initialSeason : (seasonsAvail[0] || "2"));
+if (!reg) return null;
+const active = seasonView === "1" ? reg.s1 : reg.s2;
+const col = (active && active.colors) || reg.colors || { primary: "#3A3F44", number: "#fff", plate: false, grad: ["#3A3F44", "#14171A"] };
+const chipCar = seasonView === "1" ? (reg.s1 ? reg.s1.car : pid) : (reg.s2 ? reg.s2.car : pid);
+const grad = col.grad || [col.primary, col.primary];
+return (
+<div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 55, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+<div onClick={(e) => e.stopPropagation()} className="tbcs-font-body tbcs-scrollbar" style={{ background: C.bg, width: "100%", maxWidth: 520, maxHeight: "90vh", overflowY: "auto", borderRadius: "20px 20px 0 0", border: `1px solid ${C.line}`, borderBottom: "none" }}>
+<div style={{ background: `linear-gradient(135deg, ${grad[0]}, ${grad[1]})`, padding: "22px 18px 16px", position: "relative" }}>
+<button onClick={onClose} style={{ position: "absolute", top: 14, right: 14, background: "rgba(0,0,0,0.3)", border: "none", borderRadius: 999, padding: 6, cursor: "pointer" }}><X size={18} color="#fff" /></button>
+<div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+<NumberChip car={chipCar} primary={col.primary} number={col.number} plate={col.plate} size="lg" />
+<div style={{ minWidth: 0 }}>
+<div className="tbcs-font-display" style={{ fontSize: 22, fontWeight: 700, fontStyle: "italic", color: "#fff", textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>{reg.name}</div>
+<div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap", alignItems: "center" }}>
+<MfrTag m={reg.mfr} />
+{reg.team && <Tag>{reg.team}</Tag>}
+</div>
+</div>
+</div>
+{reg.notes && reg.notes.length > 0 && (
+<div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
+{reg.notes.map((n, i) => <Tag key={i} tone="gold">{n}</Tag>)}
+</div>
+)}
+</div>
+<div style={{ position: "absolute", top: 14, right: 52 }}>
+<ShieldCrest overall={ratings.all.overall[pid]} size={58} />
+</div>
+<div style={{ padding: 18 }}>
+{}
+<div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+<Flag size={15} color={C.gold} /> All-Time Track Ratings
+</div>
+<div style={{ fontSize: 11, color: C.muted, marginBottom: 10 }}>Each track type graded 0–99 against the whole field. Updates every race.</div>
+<div style={{ marginBottom: 12 }}><RatingChips track={ratings.all.track[pid]} /></div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: 12, marginBottom: 18 }}>
+<TrackTypeBars trackTypeAvg={reg.combinedTrackAvg} trackTypeCount={reg.combinedTrackCount} />
+</div>
+{}
+{seasonsAvail.length > 0 && (
+<div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+{seasonsAvail.map(s => (
+<button key={s} onClick={() => setSeasonView(s)} className="tbcs-font-body" style={{
+flex: 1, padding: "9px 4px", borderRadius: 9, fontWeight: 700, fontSize: 12.5, cursor: "pointer",
+background: seasonView === s ? C.gold : C.panel, color: seasonView === s ? "#111" : C.text,
+border: `1px solid ${seasonView === s ? C.gold : C.line}` }}>Season {s} Profile</button>
+))}
+</div>
+)}
+{seasonsAvail.length > 0 && (
+<div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+<span className="tbcs-font-body" style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 700 }}>Season {seasonView} OVR</span>
+<TierBadge overall={(ratings[seasonView] || {}).overall ? ratings[seasonView].overall[pid] : null} />
+<div style={{ flex: 1 }}><RatingChips track={(ratings[seasonView] || {}).track ? ratings[seasonView].track[pid] : null} /></div>
+</div>
+)}
+{seasonView === "1" && reg.s1 && <S1Body profile={reg.s1.profile} data={data} seasonRank={(reg.seasonHistory.find(h => h.season === "1") || {}).rank} />}
+{seasonView === "2" && reg.s2 && <S2Body s2={reg.s2} tracks={data.seasons["2"].tracks} data={data} />}
+</div>
+</div>
+</div>
+);
+}
+function RaceNavigator({ tracks, selected, onSelect }) {
+const last = tracks.length - 1;
+return (<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: "14px 16px" }}>
+<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+<button onClick={() => onSelect(Math.max(0, selected - 1))} disabled={selected === 0} style={{ width: 36, height: 36, borderRadius: 9, background: C.panel2, border: `1px solid ${C.line}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: selected === 0 ? "default" : "pointer", opacity: selected === 0 ? 0.4 : 1 }}><ChevronLeft size={18} color={C.text} /></button>
+<div style={{ textAlign: "center", flex: 1 }}>
+<div className="tbcs-font-body" style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Standings Through</div>
+<div className="tbcs-font-display" style={{ fontSize: 19, fontWeight: 700, fontStyle: "italic", color: C.text }}>RACE {selected + 1} <span style={{ color: C.gold }}>· {tracks[selected].toUpperCase()}</span></div>
+</div>
+<button onClick={() => onSelect(Math.min(last, selected + 1))} disabled={selected === last} style={{ width: 36, height: 36, borderRadius: 9, background: C.panel2, border: `1px solid ${C.line}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: selected === last ? "default" : "pointer", opacity: selected === last ? 0.4 : 1 }}><ChevronRight size={18} color={C.text} /></button>
+</div>
+<input type="range" min={0} max={last} value={selected} onChange={(e) => onSelect(Number(e.target.value))} className="tbcs-slider" style={{ width: "100%", marginTop: 14 }} />
+<div className="tbcs-font-mono" style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, color: C.muted, marginTop: 6 }}><span>R1</span><span>R{Math.round((last + 1) / 2)}</span><span>R{last + 1}</span></div>
+</div>);
+}
+function RecapStrip({ mllCar, s1arr, s2arr }) {
+const Pod = ({ label, arr }) => (
+<div style={{ flex: 1, minWidth: 130 }}>
+<div className="tbcs-font-body" style={{ fontSize: 9.5, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 700, marginBottom: 5 }}>{label}</div>
+<div style={{ display: "flex", gap: 5 }}>
+{arr.slice(0, 3).map((car, i) => (
+<div key={i} style={{ display: "flex", alignItems: "center", gap: 4, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 7, padding: "3px 7px" }}>
+<span className="tbcs-font-mono" style={{ fontSize: 9, color: [C.gold, "#C9CDd3", "#C8813C"][i], fontWeight: 700 }}>{i + 1}</span>
+<span className="tbcs-font-display" style={{ fontSize: 12, fontWeight: 700, color: C.text }}>#{car}</span>
+</div>
+))}
+</div>
+</div>
+);
+return (<div style={{ background: `linear-gradient(180deg, ${C.panel2}, ${C.panel})`, border: `1px solid ${C.line}`, borderRadius: 12, padding: "12px 14px" }}>
+<div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+<div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,201,51,0.14)", border: `1px solid rgba(255,201,51,0.4)`, borderRadius: 999, padding: "3px 10px" }}>
+<Zap size={13} color={C.gold} /><span className="tbcs-font-body" style={{ fontSize: 11, color: C.gold, fontWeight: 700 }}>Most Laps Led</span>
+<span className="tbcs-font-display" style={{ fontSize: 13, color: "#fff", fontWeight: 700 }}>#{mllCar}</span>
+</div>
+</div>
+<div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}><Pod label="Stage 1" arr={s1arr} /><Pod label="Stage 2" arr={s2arr} /></div>
+</div>);
+}
+function s2StandingsThrough(season, nRaces) {
+const HUMAN = { "15": 1, "27": 1 };
+const orders = season.fullOrders || {};
+const stages = season.stages || [];
+const mll = season.mll || [];
+const acc = {};
+const ensure = (c) => { if (!acc[c]) acc[c] = { pts: 0, raceW: 0 }; };
+for (let r = 1; r <= nRaces; r++) {
+const o = orders[String(r)];
+if (!o) continue;
+for (let i = 0; i < o.length; i++) { const c = o[i]; ensure(c); const n = i + 1; acc[c].pts += (n === 1 ? (HUMAN[c] ? 40 : 55) : (41 - n)); }
+ensure(o[0]); acc[o[0]].raceW += 1;
+const st = stages[r - 1] || {};
+["s1", "s2", "s3"].forEach((k) => { const arr = st[k]; if (!arr) return; arr.slice(0, 3).forEach((c, idx) => { if (HUMAN[c]) return; ensure(c); acc[c].pts += [10, 9, 8][idx]; }); });
+const m = mll[r - 1]; if (m) { ensure(m); acc[m].pts += 5; }
+}
+return acc;
+}
+function TowerTab({ season, historical, prevMap, selectedRace, setSelectedRace, onOpenDriver }) {
+const [expanded, setExpanded] = useState(false);
+const [showIndex, setShowIndex] = useState(false);
+if (historical) {
+const rows = season.standings;
+const champ = rows[0];
+const visible = expanded ? rows : rows.slice(0, 16);
+return (<div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+<div style={{ background: `linear-gradient(135deg, ${champ.primary}, #0B0D0F)`, border: `1px solid ${C.line}`, borderRadius: 12, padding: 16, display: "flex", alignItems: "center", gap: 12 }}>
+<Crown size={26} color={C.gold} />
+<div><div className="tbcs-font-body" style={{ fontSize: 10, color: "rgba(255,255,255,0.85)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Champion</div>
+<div className="tbcs-font-display" style={{ fontSize: 22, fontWeight: 700, fontStyle: "italic", color: "#fff" }}>#{champ.car} {champ.name}</div></div>
+</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+<div style={{ display: "grid", gridTemplateColumns: "34px 46px 1fr auto auto", gap: 8, padding: "8px 14px", borderBottom: `1px solid ${C.line}` }}>
+{["POS", "CAR", "DRIVER", "PTS", "AVG"].map((h, i) => <div key={h} className="tbcs-font-body" style={{ fontSize: 10, color: C.muted, fontWeight: 700, textAlign: i >= 3 ? "right" : "left" }}>{h}</div>)}
+</div>
+{visible.map((d, i) => (<React.Fragment key={d.car}>
+<div onClick={() => onOpenDriver(d.pid, "1")} style={{ display: "grid", gridTemplateColumns: "34px 46px 1fr auto auto", gap: 8, alignItems: "center", padding: "10px 14px", cursor: "pointer", borderLeft: `4px solid ${d.primary}`, background: i % 2 ? "rgba(255,255,255,0.015)" : "transparent", borderBottom: `1px solid ${C.line}` }}>
+<div className="tbcs-font-mono" style={{ fontSize: 15, fontWeight: 700, color: d.rank === 1 ? C.gold : C.text }}>{d.rank}</div>
+<NumberChip car={d.car} primary={d.primary} number={d.number} plate={d.plate} size="sm" />
+<div style={{ minWidth: 0 }}>
+<div style={{ fontSize: 14, fontWeight: 700, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</div>
+<div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 2 }}><WinFlags count={d.wins} /></div>
+</div>
+<div style={{ textAlign: "right" }}>
+<div className="tbcs-font-display" style={{ fontSize: 16, fontWeight: 700, color: C.text }}>{d.pts}</div>
+<div className="tbcs-font-mono" style={{ fontSize: 9, color: C.muted }}>{d.ptsType === "chase" ? "chase" : "season"}</div>
+</div>
+<div className="tbcs-font-mono" style={{ textAlign: "right", fontSize: 12, color: C.muted }}>{(((season.profiles||{})[d.car]||{}).avg||0).toFixed(1)}</div>
+</div>
+{d.rank === 12 && (<div style={{ padding: "8px 14px", background: "rgba(255,201,51,0.1)", borderTop: `2px dashed ${C.gold}`, borderBottom: `2px dashed ${C.gold}`, textAlign: "center", fontSize: 10, color: C.gold, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>▲ Chase Field (reset pts) — below: full-season pts ▼</div>)}
+</React.Fragment>))}
+<button onClick={() => setExpanded(!expanded)} className="tbcs-font-body" style={{ width: "100%", padding: "10px", background: C.panel2, color: C.muted, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, border: "none", cursor: "pointer" }}>{expanded ? <>Show Top 16 <ChevronUp size={14} /></> : <>Show Full Field ({rows.length}) <ChevronDown size={14} /></>}</button>
+</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+<button onClick={() => setShowIndex(!showIndex)} className="tbcs-font-body" style={{ width: "100%", padding: "12px 14px", background: "transparent", border: "none", color: C.text, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+<span className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, fontStyle: "italic" }}>36-RACE INDEX</span>{showIndex ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+</button>
+{showIndex && season.index.map((r) => {
+const col = season.colorMap[r.winner] || { primary: "#3A3F44", number: "#fff", plate: false };
+const pid = r.winner === "87" ? "27" : r.winner === "24" ? "15" : r.winner;
+return (<div key={r.race} onClick={() => r.winner !== "—" && onOpenDriver(pid, "1")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", borderTop: `1px solid ${C.line}`, cursor: "pointer" }}>
+<div className="tbcs-font-mono" style={{ width: 26, color: C.muted, fontSize: 12 }}>R{r.race}</div>
+<div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.track}</div>
+<div style={{ fontSize: 10.5, color: C.muted }}>{r.type}{r.field < 40 ? ` · ${r.field} cars` : ""}</div></div>
+<CheckerFlag size={11} /><NumberChip car={r.winner} primary={col.primary} number={col.number} plate={col.plate} size="sm" />
+</div>);
+})}
+</div>
+</div>);
+}
+const nR = selectedRace + 1;
+const curAcc = s2StandingsThrough(season, nR);
+const prevAcc = s2StandingsThrough(season, nR - 1);
+const meta = season.drivers;
+const drivers = meta.map(d => ({ ...d, pts: (curAcc[d.car] || { pts: 0 }).pts, raceW: (curAcc[d.car] || { raceW: 0 }).raceW }))
+.sort((a, b) => b.pts - a.pts || a.car.localeCompare(b.car));
+drivers.forEach((d, i) => { d.rank = i + 1; });
+const prevPtsMap = {}; meta.forEach(d => { prevPtsMap[d.car] = (prevAcc[d.car] || { pts: 0 }).pts; });
+const prevRank = {}; [...meta].map(d => ({ car: d.car, pts: prevPtsMap[d.car] })).sort((a, b) => b.pts - a.pts || a.car.localeCompare(b.car)).forEach((d, i) => { prevRank[d.car] = i + 1; });
+const leader = drivers[0];
+const raceIdx = selectedRace;
+const rw = season.winners[raceIdx];
+const rwName = season.winnerNames[rw] || (drivers.find(d => d.car === rw) || {}).name || rw;
+const rwd = drivers.find(d => d.car === rw);
+const stages = season.stages[raceIdx] || { s1: [], s2: [] };
+const mllCar = season.mll[raceIdx];
+const hasPrev = nR > 1;
+let mover = null, faller = null;
+if (hasPrev) {
+const dl = drivers.map(d => ({ d, delta: (prevRank[d.car] || d.rank) - d.rank }));
+mover = [...dl].sort((a, b) => b.delta - a.delta)[0];
+faller = [...dl].sort((a, b) => a.delta - b.delta)[0];
+if (mover && mover.delta <= 0) mover = null;
+if (faller && faller.delta >= 0) faller = null;
+}
+const visible = expanded ? drivers : drivers.slice(0, 16);
+return (<div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+<RaceNavigator tracks={season.tracks} selected={selectedRace} onSelect={setSelectedRace} />
+<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+<StatCard car={leader.car} primary={leader.primary} number={leader.number} plate={leader.plate} label="Points Leader" value={leader.name} sub={`${leader.pts} pts`} />
+<StatCard car={rw} primary={rwd?.primary} number={rwd?.number} plate={rwd?.plate} label={`Race ${raceIdx + 1} Winner`} value={rwName} sub={season.tracks[raceIdx]} />
+<StatCard car={mover ? mover.d.car : null} primary={mover?.d.primary} number={mover?.d.number} plate={mover?.d.plate} label="Biggest Mover" value={mover ? mover.d.name : "—"} sub={mover ? `▲ ${mover.delta} to P${mover.d.rank}` : "—"} subColor={mover ? C.greenBright : undefined} />
+<StatCard car={faller ? faller.d.car : null} primary={faller?.d.primary} number={faller?.d.number} plate={faller?.d.plate} label="Biggest Faller" value={faller ? faller.d.name : "—"} sub={faller ? `▼ ${Math.abs(faller.delta)} to P${faller.d.rank}` : "—"} subColor={faller ? C.red : undefined} />
+</div>
+{(stages.s1.length > 0 || stages.s2.length > 0 || mllCar) && <RecapStrip mllCar={mllCar} s1arr={stages.s1} s2arr={stages.s2} />}
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+<div style={{ display: "grid", gridTemplateColumns: "34px 22px 46px 1fr auto auto", gap: 8, padding: "8px 14px", borderBottom: `1px solid ${C.line}` }}>
+{["POS", "+/-", "CAR", "DRIVER", "PTS", "GAP"].map((h, i) => <div key={h} className="tbcs-font-body" style={{ fontSize: 10, color: C.muted, fontWeight: 700, textAlign: i >= 4 ? "right" : "left" }}>{h}</div>)}
+</div>
+{visible.map((d, i) => {
+const gap = leader.pts - d.pts; const prevPts = prevPtsMap[d.car]; const pd = hasPrev && prevPts !== undefined ? d.pts - prevPts : null;
+let rd = null;
+if (hasPrev) { rd = (prevRank[d.car] || d.rank) - d.rank; }
+return (<div key={d.car} onClick={() => onOpenDriver(d.pid, "2")} style={{ display: "grid", gridTemplateColumns: "34px 22px 46px 1fr auto auto", gap: 8, alignItems: "center", padding: "10px 14px", cursor: "pointer", borderLeft: `4px solid ${d.primary}`, background: i % 2 ? "rgba(255,255,255,0.015)" : "transparent", borderBottom: `1px solid ${C.line}` }}>
+<div className="tbcs-font-mono" style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{d.rank}</div>
+<div className="tbcs-font-mono" style={{ fontSize: 11, fontWeight: 700, color: rd > 0 ? C.greenBright : rd < 0 ? C.red : C.muted }}>{rd === null || rd === 0 ? "–" : rd > 0 ? `▲${rd}` : `▼${Math.abs(rd)}`}</div>
+<NumberChip car={d.car} primary={d.primary} number={d.number} plate={d.plate} size="sm" />
+<div style={{ minWidth: 0 }}>
+<div style={{ fontSize: 14, fontWeight: 700, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</div>
+<div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 2, flexWrap: "wrap" }}><MfrTag m={d.manufacturer} /><WinFlags count={d.raceW} />{pd !== null && pd !== 0 && <span style={{ fontSize: 11, color: C.greenBright, fontWeight: 700 }}>+{pd}</span>}</div>
+</div>
+<div className="tbcs-font-display" style={{ textAlign: "right", fontSize: 17, fontWeight: 700, color: C.text }}>{d.pts}</div>
+<div className="tbcs-font-mono" style={{ textAlign: "right", fontSize: 10.5, color: C.muted }}>{gap === 0 ? "LEADER" : `-${gap}`}</div>
+</div>);
+})}
+<button onClick={() => setExpanded(!expanded)} className="tbcs-font-body" style={{ width: "100%", padding: "10px", background: C.panel2, color: C.muted, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, border: "none", cursor: "pointer" }}>{expanded ? <>Show Top 16 <ChevronUp size={14} /></> : <>Show Full Field ({drivers.length}) <ChevronDown size={14} /></>}</button>
+</div>
+</div>);
+}
+function ChaseTab({ season, historical, onOpenDriver }) {
+if (historical) {
+return (<div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+<div style={{ background: `linear-gradient(135deg,#00913F,#0B3D22)`, borderRadius: 12, padding: 16 }}>
+<div style={{ fontSize: 11, color: "rgba(255,255,255,0.85)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Season 1 Champion</div>
+<div className="tbcs-font-display" style={{ fontSize: 24, fontWeight: 700, fontStyle: "italic", color: "#fff" }}>#{season.champion} {season.championName}</div>
+<div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.85)" }}>Runner-Up: #{season.runnerUp} {season.runnerUpName}</div>
+</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+<div className="tbcs-font-display" style={{ padding: "12px 14px", borderBottom: `1px solid ${C.line}`, fontSize: 15, fontWeight: 700, fontStyle: "italic" }}>FINAL CHASE STANDINGS</div>
+{season.finalChase.map((row, i) => { const col = season.colorMap[row.car] || {}; const pid = row.car === "87" ? "27" : row.car === "24" ? "15" : row.car;
+return (<div key={row.car} onClick={() => onOpenDriver(pid, "1")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderLeft: `4px solid ${col.primary || "#3A3F44"}`, borderBottom: `1px solid ${C.line}`, cursor: "pointer" }}>
+<div className="tbcs-font-mono" style={{ width: 22, color: i === 0 ? C.gold : C.muted, fontSize: 14, fontWeight: 700 }}>{i + 1}</div>
+<NumberChip car={row.car} primary={col.primary || "#3A3F44"} number={col.number || "#fff"} plate={col.plate} size="sm" />
+<div style={{ flex: 1, fontSize: 13.5, fontWeight: 700 }}>{row.name}</div>
+<div className="tbcs-font-mono" style={{ fontWeight: 700 }}>{row.pts}</div></div>);
+})}
+</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+<div className="tbcs-font-display" style={{ padding: "12px 14px", borderBottom: `1px solid ${C.line}`, fontSize: 15, fontWeight: 700, fontStyle: "italic" }}>CHASE GRID (AFTER RACE 26)</div>
+{season.regGrid.map((row) => { const col = season.colorMap[row.car] || {}; const pid = row.car === "87" ? "27" : row.car === "24" ? "15" : row.car;
+return (<div key={row.car} onClick={() => onOpenDriver(pid, "1")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderLeft: `4px solid ${col.primary || "#3A3F44"}`, borderBottom: `1px solid ${C.line}`, cursor: "pointer" }}>
+<div className="tbcs-font-mono" style={{ width: 46, color: C.muted, fontSize: 12 }}>Seed {row.seed}</div>
+<NumberChip car={row.car} primary={col.primary || "#3A3F44"} number={col.number || "#fff"} plate={col.plate} size="sm" />
+<div style={{ flex: 1, fontSize: 13.5, fontWeight: 700 }}>{row.name}</div>
+<div className="tbcs-font-mono" style={{ fontWeight: 700, color: C.greenBright }}>{row.pts}</div></div>);
+})}
+</div>
+</div>);
+}
+const drivers = season.drivers;
+const chase = drivers.slice(0, 16); const bubble = drivers.slice(16, 20);
+const pc = drivers.slice(16).find(d => !d.human) || drivers[16];
+const cut = drivers[15].pts; const seeds = [75, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 8, 6, 4, 2];
+return (<div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
+<div className="tbcs-font-display" style={{ fontSize: 16, fontWeight: 700, fontStyle: "italic", marginBottom: 4 }}>CHASE FIELD</div>
+<div style={{ fontSize: 12, color: C.muted }}>Top 16 after Race 26 make the Chase. No win-and-in, no eliminations.</div>
+</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+{chase.map((d, i) => (<div key={d.car} onClick={() => onOpenDriver(d.pid, "2")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderLeft: `4px solid ${d.primary}`, borderBottom: `1px solid ${C.line}`, cursor: "pointer" }}>
+<div className="tbcs-font-mono" style={{ width: 20, color: C.muted, fontSize: 13 }}>{i + 1}</div>
+<NumberChip car={d.car} primary={d.primary} number={d.number} plate={d.plate} size="sm" />
+<div style={{ flex: 1 }}><div style={{ fontSize: 13.5, fontWeight: 700 }}>{d.name}</div><div style={{ fontSize: 11, color: C.muted, display: "flex", gap: 6, alignItems: "center" }}>{d.pts} pts <WinFlags count={d.raceW} /></div></div>
+<div className="tbcs-font-mono" style={{ color: C.greenBright, fontSize: 13, fontWeight: 700 }}>{seeds[i]} Pts</div></div>))}
+<div style={{ padding: "10px 14px", background: "rgba(255,201,51,0.1)", borderTop: `2px dashed ${C.gold}`, textAlign: "center", fontSize: 11, color: C.gold, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>▲ Chase Cutline — {cut} pts ▲</div>
+{bubble.map((d, i) => (<div key={d.car} onClick={() => onOpenDriver(d.pid, "2")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderLeft: `4px solid ${d.primary}`, borderBottom: `1px solid ${C.line}`, cursor: "pointer", opacity: 0.75 }}>
+<div className="tbcs-font-mono" style={{ width: 20, color: C.muted, fontSize: 13 }}>{i + 17}</div>
+<NumberChip car={d.car} primary={d.primary} number={d.number} plate={d.plate} size="sm" />
+<div style={{ flex: 1 }}><div style={{ fontSize: 13.5, fontWeight: 700 }}>{d.name}</div><div style={{ fontSize: 11, color: C.muted }}>{d.pts} pts · {cut - d.pts} out</div></div></div>))}
+</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
+<div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, fontStyle: "italic", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}><Trophy size={16} color={C.gold} /> PEOPLE'S CHAMP</div>
+<div onClick={() => onOpenDriver(pc.pid, "2")} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+<NumberChip car={pc.car} primary={pc.primary} number={pc.number} plate={pc.plate} />
+<div><div style={{ fontWeight: 700 }}>{pc.name}</div><div style={{ fontSize: 12, color: C.muted }}>P{pc.rank} · {pc.pts} pts</div></div></div>
+</div>
+</div>);
+}
+function StageTab({ season, onOpenDriver }) {
+const ranked = [...season.drivers].sort((a, b) => b.sp - a.sp);
+return (<div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+<div className="tbcs-font-display" style={{ padding: "12px 14px", borderBottom: `1px solid ${C.line}`, fontSize: 16, fontWeight: 700, fontStyle: "italic" }}>STAGE POINTS LEADERBOARD</div>
+{ranked.slice(0, 20).map((d, i) => (<div key={d.car} onClick={() => onOpenDriver(d.pid, "2")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderLeft: `4px solid ${d.primary}`, borderBottom: `1px solid ${C.line}`, cursor: "pointer" }}>
+<div className="tbcs-font-mono" style={{ width: 20, color: C.muted, fontSize: 13 }}>{i + 1}</div>
+<NumberChip car={d.car} primary={d.primary} number={d.number} plate={d.plate} size="sm" />
+<div style={{ flex: 1, fontSize: 13.5, fontWeight: 700 }}>{d.name}</div>
+<div className="tbcs-font-mono" style={{ fontWeight: 700, color: C.greenBright }}>{d.sp}</div></div>))}
+<div style={{ padding: "10px 14px", fontSize: 11, color: C.muted, fontStyle: "italic", borderTop: `1px solid ${C.line}` }}>#15 and #27 always score zero stage points by rule.</div>
+</div>
+</div>);
+}
+function buildOwnerPoints(data) {
+const meta = data.meta || {}; const teams = meta.teams || {};
+const HUMAN = { "15": 1, "27": 1 };
+const posPts = (c, n) => (n === 1 ? (HUMAN[c] ? 40 : 55) : (41 - n));
+const s2 = data.seasons["2"]; const s1 = data.seasons["1"];
+const nameByCar2 = {}; (s2.drivers || []).forEach(d => { nameByCar2[d.car] = d; });
+function computeSeries(orders, teamOf, N) {
+const owner = {};
+const ensure = (t) => { if (!owner[t]) owner[t] = { pts: 0, wins: 0, races: 0 }; };
+for (let r = 1; r <= N; r++) {
+const order = orders(r);
+if (!order) continue;
+const bestByTeam = {};
+order.forEach((c, i) => {
+const team = teamOf(c) || "Independent";
+const pts = posPts(c, i + 1);
+if (!bestByTeam[team] || pts > bestByTeam[team].pts) bestByTeam[team] = { pts, car: c, pos: i + 1 };
+});
+Object.keys(bestByTeam).forEach(team => {
+ensure(team); owner[team].pts += bestByTeam[team].pts; owner[team].races++;
+if (bestByTeam[team].pos === 1) owner[team].wins++;
+});
+}
+return owner;
+}
+const s2owner = computeSeries((r) => (s2.fullOrders || {})[String(r)], (c) => teams[c], (s2.tracks || []).length);
+const s1RaceOrders = {}; const s1map = (c) => c === "87" ? "27" : c === "24" ? "15" : c;
+Object.keys(s1.profiles || {}).forEach(car => {
+(s1.profiles[car].fins || []).forEach(([race, pos]) => { (s1RaceOrders[race] = s1RaceOrders[race] || [])[pos - 1] = s1map(car); });
+});
+const s1N = (s1.index || []).length;
+const s1owner = computeSeries((r) => s1RaceOrders[r], (c) => teams[s1map === null ? c : c] || teams[c], s1N);
+const carsOf = (team) => Object.keys(teams).filter(c => teams[c] === team);
+const toRows = (ownerMap) => Object.keys(ownerMap).map(team => ({ team, ...ownerMap[team], cars: carsOf(team) })).sort((a, b) => b.pts - a.pts);
+return { "2": toRows(s2owner), "1": toRows(s1owner) };
+}
+function OwnerTab({ data, historical }) {
+const owners = React.useMemo(() => buildOwnerPoints(data), [data]);
+const rows = historical ? owners["1"] : owners["2"];
+const meta = data.meta || {};
+return (
+<div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+<div style={{ background: "linear-gradient(135deg, #1A1D21, #131518)", border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
+<div className="tbcs-font-display" style={{ fontSize: 16, fontWeight: 700, fontStyle: "italic", marginBottom: 2 }}>OWNER STANDINGS</div>
+<div style={{ fontSize: 11, color: C.muted }}>Each team's best-finishing car scores that race — same as real NASCAR owner points. Multi-car teams don't stack.</div>
+</div>
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+<div style={{ display: "grid", gridTemplateColumns: "28px 1fr auto auto", gap: 8, padding: "8px 14px", borderBottom: `1px solid ${C.line}` }}>
+{["#", "TEAM", "WINS", "PTS"].map((h, i) => <div key={h} className="tbcs-font-body" style={{ fontSize: 10, color: C.muted, fontWeight: 700, textAlign: i >= 2 ? "right" : "left" }}>{h}</div>)}
+</div>
+{rows.map((r, i) => (
+<div key={r.team} style={{ display: "grid", gridTemplateColumns: "28px 1fr auto auto", gap: 8, alignItems: "center", padding: "9px 14px", borderBottom: `1px solid ${C.line}`, background: i % 2 ? "rgba(255,255,255,0.015)" : "transparent" }}>
+<div className="tbcs-font-mono" style={{ fontSize: 14, fontWeight: 700, color: i === 0 ? C.gold : C.text }}>{i + 1}</div>
+<div style={{ minWidth: 0 }}>
+<div style={{ fontSize: 13.5, fontWeight: 700, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.team}</div>
+<div style={{ fontSize: 10.5, color: C.muted }}>{r.cars.map(c => "#" + c).join(" · ")}</div>
+</div>
+<div className="tbcs-font-mono" style={{ textAlign: "right", fontSize: 12.5, color: C.muted }}>{r.wins}</div>
+<div className="tbcs-font-display" style={{ textAlign: "right", fontSize: 17, fontWeight: 700, color: C.text }}>{r.pts}</div>
+</div>
+))}
+</div>
+</div>
+);
+}
+function LeaderCard({ title, icon, rows, valueKey, onOpenDriver }) {
+const sorted = [...rows].filter(d => d[valueKey] > 0).sort((a, b) => b[valueKey] - a[valueKey]).slice(0, 3);
+return (<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
+<div className="tbcs-font-display" style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>{icon} {title}</div>
+{sorted.length === 0 && <div style={{ fontSize: 12, color: C.muted }}>No data.</div>}
+{sorted.map((d, i) => (<div key={d.car} onClick={() => onOpenDriver(d.pid, d._season)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", cursor: "pointer" }}>
+<div className="tbcs-font-mono" style={{ width: 16, color: i === 0 ? C.gold : C.muted, fontSize: 12, fontWeight: 700 }}>{i + 1}</div>
+<NumberChip car={d.car} primary={d.primary} number={d.number} plate={d.plate} size="sm" />
+<div style={{ flex: 1, fontSize: 12.5, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</div>
+<div className="tbcs-font-mono" style={{ fontSize: 13, fontWeight: 700 }}>{d[valueKey]}</div></div>))}
+</div>);
+}
+function LeadersTab({ season, historical, onOpenDriver }) {
+const rows = historical
+? Object.keys(season.profiles || {}).map(car => {
+const pr = season.profiles[car];
+const col = (season.colorMap || {})[car] || {};
+const pid = (car === "87") ? "27" : (car === "24") ? "15" : car;
+return { car, pid, name: pr.name, _season: "1", raceW: pr.wins, mll: pr.mll, t5: pr.t5, t10: pr.t10, avg: pr.avg,
+primary: col.primary || "#3A3F44", number: col.number || "#fff", plate: !!col.plate };
+})
+: season.drivers.map(d => ({ ...d, _season: "2", raceW: d.raceW }));
+const bestAvg = [...rows].filter(d => d.avg > 0).sort((a, b) => a.avg - b.avg).slice(0, 3);
+return (<div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+<LeaderCard title="Race Wins" icon={<Trophy size={15} color={C.gold} />} rows={rows} valueKey="raceW" onOpenDriver={onOpenDriver} />
+<LeaderCard title="Most Laps Led Bonuses" icon={<Flag size={15} color={C.gold} />} rows={rows} valueKey="mll" onOpenDriver={onOpenDriver} />
+{!historical && <LeaderCard title="Stage Points" icon={<Zap size={15} color={C.greenBright} />} rows={rows} valueKey="sp" onOpenDriver={onOpenDriver} />}
+<LeaderCard title="Top 5 Finishes" icon={<Trophy size={15} color={C.muted} />} rows={rows} valueKey="t5" onOpenDriver={onOpenDriver} />
+<LeaderCard title="Top 10 Finishes" icon={<Trophy size={15} color={C.muted} />} rows={rows} valueKey="t10" onOpenDriver={onOpenDriver} />
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
+<div className="tbcs-font-display" style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>Best Average Finish</div>
+{bestAvg.map((d, i) => (<div key={d.car} onClick={() => onOpenDriver(d.pid, d._season)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", cursor: "pointer" }}>
+<div className="tbcs-font-mono" style={{ width: 16, color: i === 0 ? C.gold : C.muted, fontSize: 12, fontWeight: 700 }}>{i + 1}</div>
+<NumberChip car={d.car} primary={d.primary} number={d.number} plate={d.plate} size="sm" />
+<div style={{ flex: 1, fontSize: 12.5, fontWeight: 700 }}>{d.name}</div>
+<div className="tbcs-font-mono" style={{ fontSize: 13, fontWeight: 700 }}>{d.avg.toFixed(2)}</div></div>))}
+</div>
+</div>);
+}
+function powerRankingText(data, ratings, registry) {
+const hist = data.ratingsHistory || [];
+const ref = hist.length >= 1 ? hist[hist.length - 1] : null;
+if (!ref) return null;
+const live = ratings.all.overall;
+const pids = Object.keys(live);
+const nameOf = (pid) => (registry[pid] ? registry[pid].name : "#" + pid);
+let riser = null, faller = null;
+pids.forEach(pid => {
+const d = live[pid] - (ref.all[pid] != null ? ref.all[pid] : live[pid]);
+if (!riser || d > riser.d) riser = { pid, d };
+if (!faller || d < faller.d) faller = { pid, d };
+});
+const top = [...pids].sort((a, b) => live[b] - live[a])[0];
+const s2 = data.seasons["2"].drivers;
+const leader = s2[0], p2 = s2[1];
+const bits = [];
+bits.push(`#${top} ${nameOf(top)} tops the league at ${live[top]} OVR.`);
+if (riser && riser.d > 0) bits.push(`Biggest riser: #${riser.pid} ${nameOf(riser.pid)} (+${riser.d}).`);
+if (faller && faller.d < 0) bits.push(`Sliding: #${faller.pid} ${nameOf(faller.pid)} (${faller.d}).`);
+if (leader && p2) bits.push(`Up front, #${leader.car} ${leader.name} leads #${p2.car} ${p2.name} by ${leader.pts - p2.pts} pts.`);
+return { window: `Since ${ref.label}`, text: bits.join(" ") };
+}
+function RatingsTab({ data, ratings, registry, onOpenDriver }) {
+const hist = data.ratingsHistory || [];
+const ref = hist.length >= 1 ? hist[hist.length - 1] : null;
+const rows = Object.keys(ratings.all.overall).map(pid => {
+const ovr = ratings.all.overall[pid];
+const refOvr = ref && ref.all[pid] != null ? ref.all[pid] : null;
+const mv = refOvr != null ? ovr - refOvr : null;
+const reg = registry[pid] || {};
+const col = reg.colors || { primary: "#3A3F44", number: "#fff", plate: false };
+return { pid, ovr, mv, name: reg.name || ("#" + pid), car: reg.s2 ? reg.s2.car : (reg.s1 ? reg.s1.car : pid), col };
+}).sort((a, b) => b.ovr - a.ovr);
+const pr = powerRankingText(data, ratings, registry);
+return (
+<div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+{pr && (
+<div style={{ background: "linear-gradient(135deg, #1A1D21, #131518)", border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
+<div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, fontStyle: "italic", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+<Zap size={15} color={C.gold} /> POWER RANKINGS
+</div>
+<div style={{ fontSize: 10, color: C.muted, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 700 }}>{pr.window}</div>
+<div style={{ fontSize: 13, color: C.text, lineHeight: 1.5 }}>{pr.text}</div>
+</div>
+)}
+<div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+<div style={{ display: "grid", gridTemplateColumns: "32px 40px 1fr auto auto", gap: 8, padding: "8px 14px", borderBottom: `1px solid ${C.line}` }}>
+{["#", "CAR", "DRIVER", "OVR", "\u00b1"].map((h, i) => <div key={h} className="tbcs-font-body" style={{ fontSize: 10, color: C.muted, fontWeight: 700, textAlign: i >= 3 ? "right" : "left" }}>{h}</div>)}
+</div>
+{rows.map((r, i) => {
+const t = TIER(r.ovr);
+return (
+<div key={r.pid} onClick={() => onOpenDriver(r.pid, "2")} style={{ display: "grid", gridTemplateColumns: "32px 40px 1fr auto auto", gap: 8, alignItems: "center", padding: "9px 14px", cursor: "pointer", borderBottom: `1px solid ${C.line}`, background: i % 2 ? "rgba(255,255,255,0.015)" : "transparent" }}>
+<div className="tbcs-font-mono" style={{ fontSize: 14, fontWeight: 700, color: i === 0 ? C.gold : C.text }}>{i + 1}</div>
+<NumberChip car={r.car} primary={r.col.primary} number={r.col.number} plate={r.col.plate} size="sm" />
+<div style={{ fontSize: 13.5, fontWeight: 700, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.name}</div>
+<div style={{ textAlign: "right" }}><span className="tbcs-font-display" style={{ fontSize: 17, fontWeight: 700, color: t.k ? t.c : C.text }}>{r.ovr}</span></div>
+<div className="tbcs-font-mono" style={{ textAlign: "right", fontSize: 12, fontWeight: 700, color: r.mv == null ? C.muted : r.mv > 0 ? C.greenBright : r.mv < 0 ? C.red : C.muted, minWidth: 34 }}>
+{r.mv == null ? "\u2013" : r.mv > 0 ? `\u25b2${r.mv}` : r.mv < 0 ? `\u25bc${Math.abs(r.mv)}` : "\u2013"}
+</div>
+</div>
+);
+})}
+</div>
+<div style={{ fontSize: 10.5, color: C.muted, fontStyle: "italic", padding: "0 4px" }}>Overall updates every race; \u00b1 shows change since the last ratings update ({ref ? ref.label : "\u2014"}).</div>
+</div>
+);
+}
+function AdminModal({ data, onClose, onApply }) {
+const [text, setText] = useState(""); const [error, setError] = useState(""); const [copied, setCopied] = useState(false);
+const handleApply = () => { try { const parsed = JSON.parse(text);
+if (!parsed || typeof parsed !== "object") throw new Error("Invalid JSON.");
+if (!(parsed.seasons || parsed.meta || parsed.seasonList)) throw new Error("Paste a race update or archive file (must include 'seasons').");
+setError(""); onApply(parsed);
+} catch (e) { setError(e.message || "Invalid JSON."); } };
+const copyTemplate = () => { setText(JSON.stringify(data, null, 2)); setCopied(true); setTimeout(() => setCopied(false), 1500); };
+return (<div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+<div onClick={(e) => e.stopPropagation()} className="tbcs-font-body" style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 16, width: "100%", maxWidth: 480, maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
+<div style={{ padding: "16px 18px", borderBottom: `1px solid ${C.line}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}><div className="tbcs-font-display" style={{ fontSize: 17, fontWeight: 700 }}>Commissioner: Update Data</div><button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} color={C.muted} /></button></div>
+<div style={{ padding: 18, overflowY: "auto" }}>
+<div style={{ fontSize: 12, color: C.muted, marginBottom: 10, lineHeight: 1.5 }}>Paste a race-update file (small) OR the Season 1 archive and tap Apply. Updates merge — you never need to paste everything at once. Everyone with the link sees it instantly.</div>
+<button onClick={copyTemplate} className="tbcs-font-body" style={{ fontSize: 12, fontWeight: 700, color: C.greenBright, background: "rgba(0,145,63,0.12)", border: `1px solid rgba(0,145,63,0.4)`, borderRadius: 8, padding: "6px 10px", marginBottom: 10, cursor: "pointer" }}>{copied ? "Copied current data ✓" : "Load current data as template"}</button>
+<textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste full payload JSON…" className="tbcs-font-mono tbcs-scrollbar" style={{ width: "100%", height: 220, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, color: C.text, fontSize: 11, padding: 10, resize: "vertical" }} />
+{error && <div style={{ color: C.red, fontSize: 12, marginTop: 8 }}>{error}</div>}
+</div>
+<div style={{ padding: 16, borderTop: `1px solid ${C.line}`, display: "flex", gap: 8 }}>
+<button onClick={onClose} className="tbcs-font-body" style={{ flex: 1, padding: "10px", borderRadius: 8, background: C.panel2, color: C.muted, border: `1px solid ${C.line}`, cursor: "pointer", fontWeight: 700 }}>Cancel</button>
+<button onClick={handleApply} className="tbcs-font-body" style={{ flex: 1, padding: "10px", borderRadius: 8, background: C.green, color: "#fff", border: "none", cursor: "pointer", fontWeight: 700 }}>Apply Update</button>
+</div>
+</div>
+</div>);
+}
+function App() {
+const [data, setData] = useState(SEED_PAYLOAD);
+const [season, setSeason] = useState(SEED_PAYLOAD.currentSeason || "2");
+const [tab, setTab] = useState("tower");
+const [selectedRace, setSelectedRace] = useState((SEED_PAYLOAD.seasons["2"].tracks.length) - 1);
+const [modal, setModal] = useState(null); // {pid, season}
+const [adminOpen, setAdminOpen] = useState(false);
+const [seasonMenu, setSeasonMenu] = useState(false);
+const [loaded, setLoaded] = useState(false);
+const [toast, setToast] = useState("");
+useEffect(() => {
+(async () => {
+try { const res = await window.storage.get(STORAGE_KEY, true);
+if (res && res.value) {
+const parsed = JSON.parse(res.value);
+const sv = (SEED_PAYLOAD && SEED_PAYLOAD.version) || 0;
+const pv = (parsed && parsed.version) || 0;
+const valid = parsed && parsed.seasons && parsed.seasons["2"] && Array.isArray(parsed.seasons["2"].tracks);
+if (valid && pv > sv) { setData(parsed); setSelectedRace(parsed.seasons["2"].tracks.length - 1); }
+}
+} catch (e) {}
+setLoaded(true);
+})();
+}, []);
+const applyUpdate = useCallback(async (patch) => {
+try {
+const merged = deepMerge(data, patch);
+await window.storage.set(STORAGE_KEY, JSON.stringify(merged), true);
+setData(merged);
+if (merged.seasons && merged.seasons["2"] && merged.seasons["2"].tracks) setSelectedRace(merged.seasons["2"].tracks.length - 1);
+setAdminOpen(false);
+setToast("Data updated — everyone with the link sees it now."); setTimeout(() => setToast(""), 3500);
+} catch (e) { setToast("Update failed to save."); setTimeout(() => setToast(""), 3500); }
+}, [data]);
+const registry = useMemo(() => buildRegistry(data), [data]);
+const ratings = useMemo(() => computeRatings(registry, (data.seasons["2"].tracks || []).length), [registry, data]);
+const historical = season === "1";
+const s1avg = useMemo(() => {
+const m = {}; const prof = ((data.seasons["1"] || {}).profiles) || {};
+Object.keys(prof).forEach(c => { m[c] = prof[c].avg; });
+return m;
+}, [data]);
+const seasonObj = data.seasons[season];
+const prevMap = data.seasons["2"].prevMap || {};
+const tabs = historical ? [{ key: "tower", label: "Tower" }, { key: "chase", label: "Chase" }, { key: "ratings", label: "Ratings" }, { key: "owner", label: "Owner" }, { key: "leaders", label: "Leaders" }]
+: [{ key: "tower", label: "Tower" }, { key: "chase", label: "Chase" }, { key: "stage", label: "Stage" }, { key: "ratings", label: "Ratings" }, { key: "owner", label: "Owner" }, { key: "leaders", label: "Leaders" }];
+const activeTab = tabs.find(t => t.key === tab) ? tab : "tower";
+const heroTitle = ({ tower: historical?"SEASON 1 ARCHIVE":"POINTS STANDINGS", chase: "CHASE TRACKER", stage: "STAGE POINTS", leaders: "LEAGUE LEADERS", ratings: "DRIVER RATINGS", owner: "OWNER STANDINGS"}[activeTab]) || ({ tower: "POINTS STANDINGS", chase: "CHASE TRACKER", stage: "STAGE POINTS", leaders: "LEAGUE LEADERS", ratings: "DRIVER RATINGS", owner: "OWNER STANDINGS"}[activeTab] || "POINTS STANDINGS");
+const openDriver = (pid, s) => setModal({ pid, season: s });
+return (<div className="tbcs-font-body" style={{ background: C.bg, minHeight: "100vh", color: C.text, paddingBottom: 90 }}>
+<GlobalStyle /><CheckeredBar />
+<div style={{ padding: "18px 16px 10px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+<div style={{ minWidth: 0 }}>
+<div className="tbcs-font-body" style={{ color: C.gold, fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>Trips B Cup Series</div>
+<div className="tbcs-font-display" style={{ fontSize: 30, fontWeight: 700, fontStyle: "italic", lineHeight: 1.05 }}>{heroTitle}</div>
+</div>
+<div style={{ position: "relative", flexShrink: 0 }}>
+<button onClick={() => setSeasonMenu(!seasonMenu)} className="tbcs-font-body" style={{ display: "flex", alignItems: "center", gap: 6, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: "8px 10px", cursor: "pointer", color: C.text, fontWeight: 700, fontSize: 11.5 }}>
+<span style={{ color: C.muted, fontSize: 9.5, textTransform: "uppercase", letterSpacing: "0.05em" }}>Archive</span>
+<span>{data.seasonList.find(s => s.id === season)?.label || "Season " + season}</span>
+<ChevronDown size={14} color={C.muted} />
+</button>
+{seasonMenu && (<div style={{ position: "absolute", right: 0, top: "calc(100% + 6px)", background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, overflow: "hidden", zIndex: 40, minWidth: 150, boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
+<div style={{ padding: "8px 12px", fontSize: 9.5, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 700, borderBottom: `1px solid ${C.line}` }}>Season Archives</div>
+{data.seasonList.map(s => (<button key={s.id} onClick={() => { setSeason(s.id); setTab("tower"); setSeasonMenu(false); }} className="tbcs-font-body" style={{ width: "100%", textAlign: "left", padding: "10px 12px", background: season === s.id ? C.panel2 : "transparent", color: season === s.id ? C.gold : C.text, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 13, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+{s.label}{s.complete && <span style={{ fontSize: 9, color: C.muted, fontWeight: 600 }}>DONE</span>}</button>))}
+</div>)}
+</div>
+</div>
+<div className="tbcs-scrollbar" style={{ display: "flex", padding: "4px 16px 14px", gap: 8, overflowX: "auto" }}>
+{tabs.map(t => (<button key={t.key} onClick={() => setTab(t.key)} className="tbcs-font-body" style={{ flex: 1, padding: "10px 4px", borderRadius: 9, fontWeight: 700, fontSize: 12, cursor: "pointer", background: activeTab === t.key ? C.gold : C.panel, color: activeTab === t.key ? "#111" : C.text, border: `1px solid ${activeTab === t.key ? C.gold : C.line}` }}>{t.label.toUpperCase()}</button>))}
+</div>
+<div style={{ padding: "0 14px 14px", maxWidth: 640, margin: "0 auto" }} onClick={() => seasonMenu && setSeasonMenu(false)}>
+{!loaded ? (<div style={{ padding: 40, textAlign: "center", color: C.muted, fontSize: 13 }}>Loading…</div>) : (<>
+{activeTab === "tower" && <TowerTab season={seasonObj} historical={historical} prevMap={prevMap} selectedRace={selectedRace} setSelectedRace={setSelectedRace} onOpenDriver={openDriver} />}
+{activeTab === "chase" && <ChaseTab season={seasonObj} historical={historical} onOpenDriver={openDriver} />}
+{activeTab === "stage" && !historical && <StageTab season={seasonObj} onOpenDriver={openDriver} />}
+{activeTab === "ratings" && <RatingsTab data={data} ratings={ratings} registry={registry} onOpenDriver={openDriver} />}
+{activeTab === "owner" && <OwnerTab data={data} historical={historical} />}
+{activeTab === "leaders" && <LeadersTab season={seasonObj} historical={historical} onOpenDriver={openDriver} />}
+</>)}
+</div>
+<button onClick={() => setAdminOpen(true)} style={{ position: "fixed", bottom: 20, right: 20, width: 52, height: 52, borderRadius: 999, background: C.gold, border: "none", boxShadow: "0 4px 14px rgba(255,201,51,0.5)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 30 }}><Settings size={22} color="#111" /></button>
+{toast && (<div style={{ position: "fixed", bottom: 82, left: "50%", transform: "translateX(-50%)", background: C.panel2, border: `1px solid ${C.line}`, borderRadius: 10, padding: "8px 14px", fontSize: 12, color: C.text, zIndex: 40, whiteSpace: "nowrap" }}>{toast}</div>)}
+{modal && <DriverModal pid={modal.pid} registry={registry} ratings={ratings} initialSeason={modal.season} data={data} onClose={() => setModal(null)} />}
+{adminOpen && <AdminModal data={data} onClose={() => setAdminOpen(false)} onApply={applyUpdate} />}
+</div>);
+}
+if(typeof window.storage==="undefined"){window.storage={get:async(k)=>{try{const v=localStorage.getItem(k);return v?{value:v}:null}catch(e){return null}},set:async(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}return{value:v}}};}
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script></body></html>
