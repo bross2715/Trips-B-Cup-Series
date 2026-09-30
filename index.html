@@ -20,7 +20,18 @@ const SEED_PAYLOAD = {"version":30,"note":"Through Race 30 \u2014 Talladega (Cha
 const STORAGE_KEY = "tbcs-payload";
 const MFR_COLOR = { CHEVY: "#FFC933", FORD: "#2A6BE0", TOYOTA: "#E4002B" };
 const mfrColor = (m) => MFR_COLOR[m] || "#8A9099";
-const TYPE_ORDER = ["Superspeedway", "Intermediate", "Short Track", "Concrete", "Road Course"];
+const TYPE_ORDER = ["Superspeedway", "Speedway", "Intermediate", "Short Track", "Concrete", "Road Course"];
+/* Track types follow NASCAR 26 driver-rating categories. "Short Track" = N26 "Short Intermediate"
+   (Martinsville folded in here by league decision). Edit this one table to re-bucket every track stat. */
+const TRACK_TYPE = {
+  "Daytona":"Superspeedway","Talladega":"Superspeedway","Atlanta":"Superspeedway","EchoPark":"Superspeedway",
+  "Indianapolis":"Speedway","Indy":"Speedway","Pocono":"Speedway","Michigan":"Speedway",
+  "Darlington":"Intermediate","Charlotte":"Intermediate","Chicagoland":"Intermediate","Homestead":"Intermediate","Kansas":"Intermediate","Las Vegas":"Intermediate","Texas":"Intermediate",
+  "Bristol":"Concrete","Dover":"Concrete","Nashville":"Concrete",
+  "Iowa":"Short Track","New Hampshire":"Short Track","North Wilkesboro":"Short Track","Phoenix":"Short Track","Richmond":"Short Track","Gateway":"Short Track","Martinsville":"Short Track",
+  "COTA":"Road Course","San Diego":"Road Course","Coronado":"Road Course","Sonoma":"Road Course","Watkins Glen":"Road Course","Chicago":"Road Course","Chicago Street Course":"Road Course"
+};
+const trackTypeOf = (t) => TRACK_TYPE[(t || "").trim()] || "Intermediate";
 const C = {
 bg: "#0A0A0B", panel: "#131518", panel2: "#1A1D21", line: "#26292E",
 text: "#F5F3EE", muted: "#8A9099", gold: "#FFC933", green: "#00913F",
@@ -33,7 +44,7 @@ for (const k of Object.keys(patch)) out[k] = deepMerge(out[k], patch[k]);
 return out;
 }
 const TIER = (o) => o>=95?{k:"PLATINUM",c:"#7FE3E0",t:"#062B2A"}:o>=85?{k:"GOLD",c:"#FFC933",t:"#111"}:o>=75?{k:"SILVER",c:"#C7CDD6",t:"#111"}:o>=65?{k:"BRONZE",c:"#C8813C",t:"#fff"}:{k:"",c:"#2A2F35",t:"#8A9099"};
-const TYPE_ABBR = { "Superspeedway":"SS", "Intermediate":"INT", "Short Track":"ST", "Concrete":"CON", "Road Course":"RC" };
+const TYPE_ABBR = { "Superspeedway":"SS", "Intermediate":"INT", "Short Track":"ST", "Concrete":"CON", "Road Course":"RC", "Speedway":"SPD" };
 function _pctile(vals){const xs=[...vals].sort((a,b)=>a-b);const n=vals.length;return vals.map(v=>{let b=0,e=0;for(const x of xs){if(x<v)b++;else if(x===v)e++;}return n>1?(b+(e-1)/2)/(n-1):0.5;});}
 const _ov = (c)=>Math.round(30+c*69);
 function _trackRatings(source){
@@ -67,6 +78,88 @@ const s1src={},s2src={},allsrc={};
 pids.forEach(pid=>{const r=registry[pid];if(r.s1)s1src[pid]=r.s1.profile.trackTypeAvg;if(r.s2)s2src[pid]=r.s2.trackAvg;allsrc[pid]=r.combinedTrackAvg;});
 return {"1":{overall:s1ov,track:_trackRatings(s1src)},"2":{overall:s2ov,track:_trackRatings(s2src)},all:{overall:allov,track:_trackRatings(allsrc)}};
 }
+/* ===== STAT SHEET ENGINE: every number is computed from raw finishing orders, never hand-entered ===== */
+const HUMAN_PIDS = { "27": 1, "15": 1, "13": 1 };          // human-driven cars (excluded from the AI baseline)
+const HUMAN_WIN_PIDS = { "27": 1, "15": 1 };               // 40-pt win, no stage pts (Byron #13 scores as CPU)
+const _finPts = (pid, pos) => pos === 1 ? (HUMAN_WIN_PIDS[pid] ? 40 : 55) : 41 - pos;
+const _mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+const _sdev = (a) => { const m = _mean(a); return Math.sqrt(_mean(a.map(v => (v - m) * (v - m)))); };
+const _median = (a) => { const q = [...a].sort((x, y) => x - y); const n = q.length; return n % 2 ? q[(n - 1) / 2] : (q[n / 2 - 1] + q[n / 2]) / 2; };
+const _scale = (z) => Math.max(1, Math.min(99, Math.round(50 + 49 * Math.tanh(z / 2.5))));   // 50 = average AI driver
+function computeStatSheet(data, registry) {
+  const S2 = (data.seasons || {})["2"] || {};
+  const fo = S2.fullOrders || {}; const nR = Object.keys(fo).length;
+  const pids = Object.keys(registry);
+  const mll2 = {}; (S2.mll || []).forEach(c => { if (c) mll2[c] = (mll2[c] || 0) + 1; });
+  // raw points build-up (used for bubble-race detection + integrity checks)
+  const cum = {}, rankBefore = {};
+  for (let r = 1; r <= nR; r++) {
+    const order = fo[String(r)] || [];
+    const sorted = Object.keys(cum).sort((a, b) => cum[b] - cum[a]); const rk = {}; sorted.forEach((c, i) => { rk[c] = i + 1; }); rankBefore[r] = rk;
+    order.forEach((c, i) => { cum[c] = (cum[c] || 0) + _finPts(c, i + 1); });
+    const m = (S2.mll || [])[r - 1]; if (m) cum[m] = (cum[m] || 0) + 5;
+    const st = (S2.stages || [])[r - 1] || {};
+    ["s1", "s2", "s3"].forEach(k => { (st[k] || []).slice(0, 3).forEach((c, j) => { if (!HUMAN_WIN_PIDS[c]) cum[c] = (cum[c] || 0) + [10, 9, 8][j]; }); });
+  }
+  const chaseRace = (S2.chaseLock || {}).race || 26; const chaseSet = {}; ((S2.chaseLock || {}).field || []).forEach(f => { chaseSet[f.car] = 1; });
+  const lists = { "1": {}, "2": {}, all: {} };
+  pids.forEach(pid => {
+    const reg = registry[pid];
+    const a1 = reg.s1 ? s1RaceLog(reg.s1.profile, data).map(x => ({ race: x.race, pos: x.pos })).sort((x, y) => x.race - y.race) : [];
+    const a2 = reg.s2 ? (reg.s2.finishes || []).map(x => ({ race: x.race, pos: x.pos })).sort((x, y) => x.race - y.race) : [];
+    const m1 = reg.s1 ? (reg.s1.profile.mll || 0) : 0, m2 = mll2[pid] || 0;
+    lists["1"][pid] = { f: a1, mll: m1 }; lists["2"][pid] = { f: a2, mll: m2 }; lists.all[pid] = { f: a1.concat(a2), mll: m1 + m2 };
+  });
+  const minStarts = { "1": 10, "2": 10, all: 20 };
+  const scopes = {};
+  ["1", "2", "all"].forEach(sc => {
+    const base = {};
+    Object.keys(lists[sc]).forEach(pid => {
+      const L = lists[sc][pid]; const f = L.f.map(x => x.pos); const n = f.length; if (n < minStarts[sc]) return;
+      const avg = _mean(f); const cnt = (fn) => f.filter(fn).length;
+      const m = { pid, n, avg, med: _median(f), sd: _sdev(f), t5: cnt(p => p <= 5) / n, t10: cnt(p => p <= 10) / n, t15: cnt(p => p <= 15) / n, wins: cnt(p => p === 1), winRate: cnt(p => p === 1) / n, worst: Math.max(...f), best: Math.min(...f), mll: L.mll, mllRate: L.mll / n };
+      if (n >= 8) { const l5 = _mean(f.slice(-5)); m.l5 = l5; m.formDelta = l5 - avg; m.form = m.formDelta <= -3 ? "HOT" : m.formDelta >= 3 ? "COOL" : "STEADY"; }
+      base[pid] = m;
+    });
+    const ai = Object.keys(base).filter(p => !HUMAN_PIDS[p]);
+    if (ai.length >= 5) {
+      const K = {}; ["avg", "t5", "t10", "t15", "winRate", "sd", "mllRate"].forEach(k => { const v = ai.map(p => base[p][k]); K[k] = { m: _mean(v), s: _sdev(v) || 1 }; });
+      const z = (p, k, sg) => sg * (base[p][k] - K[k].m) / K[k].s;
+      const prRaw = (p) => 0.30 * z(p, "avg", -1) + 0.15 * z(p, "t10", 1) + 0.15 * z(p, "t5", 1) + 0.15 * z(p, "winRate", 1) + 0.15 * z(p, "sd", -1) + 0.10 * z(p, "mllRate", 1);
+      const coRaw = (p) => 0.50 * z(p, "sd", -1) + 0.25 * z(p, "avg", -1) + 0.25 * z(p, "t15", 1);
+      const norm = (fn) => { const v = ai.map(fn); const mu = _mean(v), sg = _sdev(v) || 1; return (p) => (fn(p) - mu) / sg; };
+      const prZ = norm(prRaw), coZ = norm(coRaw);
+      Object.keys(base).forEach(p => { base[p].pr = _scale(prZ(p)); base[p].cons = _scale(coZ(p)); });
+    }
+    if (sc === "2") {
+      Object.keys(base).forEach(p => {
+        const reg = registry[p]; const fl = lists["2"][p].f; const m = base[p];
+        if (reg.s2 && reg.s2.agg) { m.pps = reg.s2.agg.pts / m.n; m.fpps = fl.reduce((t, x) => t + _finPts(p, x.pos), 0) / m.n; }
+        let sum = 0, k = 0;
+        fl.forEach(x => { const rk = (rankBefore[x.race] || {})[p]; const bubble = x.race >= 14 && x.race <= chaseRace && rk >= 12 && rk <= 20; const chase = x.race > chaseRace && chaseSet[p]; if (bubble || chase) { sum += m.avg - x.pos; k++; } });
+        m.clutchN = k; m.clutch = k >= 6 ? sum / k : null;
+      });
+    }
+    scopes[sc] = { rows: base, baselineN: ai.length, minStarts: minStarts[sc] };
+  });
+  // integrity checks against the stored standings
+  const checks = { races: nR, ordersOk: 0, winnersOk: 0, issues: [], ptsGap: [], stageWGap: [] };
+  for (let r = 1; r <= nR; r++) {
+    const o = fo[String(r)] || [];
+    if (o.length === 40 && new Set(o).size === 40) checks.ordersOk++; else checks.issues.push("R" + r + " has " + o.length + " entries (" + new Set(o).size + " unique)");
+    if (o[0] === (S2.winners || [])[r - 1]) checks.winnersOk++; else checks.issues.push("R" + r + " winner does not match P1");
+  }
+  const sw = {}; (S2.stages || []).forEach(st => { ["s1", "s2", "s3"].forEach(k => { if ((st[k] || [])[0]) sw[st[k][0]] = (sw[st[k][0]] || 0) + 1; }); });
+  (S2.drivers || []).forEach(d => {
+    const f = (lists["2"][d.car] || { f: [] }).f.map(x => x.pos); if (!f.length) return;
+    const avg = _mean(f);
+    if (Math.abs(avg - d.avg) > 0.011 || f.filter(p => p <= 5).length !== d.t5 || f.filter(p => p <= 10).length !== d.t10 || f.filter(p => p === 1).length !== d.raceW || (mll2[d.car] || 0) !== d.mll) checks.issues.push("#" + d.car + " finish stats differ from race data");
+    if ((cum[d.car] || 0) !== d.pts) checks.ptsGap.push({ car: d.car, name: d.name, stored: d.pts, raw: cum[d.car] || 0 });
+    if ((sw[d.car] || 0) !== d.stageW) checks.stageWGap.push({ car: d.car, stored: d.stageW, raw: sw[d.car] || 0 });
+  });
+  return { scopes, checks, chaseRace };
+}
+
 function TierBadge({ overall, size }) {
 if (overall == null) return null;
 const t = TIER(overall); const big = size === "lg";
@@ -129,12 +222,12 @@ const byRace = {}; idx.forEach(r => { byRace[r.race] = r; });
 const car = profile.car;
 return (profile.fins || []).map(([race, pos]) => {
 const r = byRace[race] || {};
-return { race, track: r.track || ("R" + race), type: r.type || "Intermediate", pos, win: pos === 1, mll: r.mll === car };
+return { race, track: r.track || ("R" + race), type: trackTypeOf(r.track), pos, win: pos === 1, mll: r.mll === car };
 });
 }
 function buildRegistry(data) {
 const S = data.seasons || {}; const meta = data.meta || {};
-const tt = (t) => (meta.trackType && meta.trackType[(t || "").trim()]) || "Intermediate";
+const tt = trackTypeOf;
 const s1 = S["1"] || {}; const s2 = S["2"] || {};
 const s1prof = s1.profiles || {}; const s1cmap = s1.colorMap || {};
 const s2byCar = {}; (s2.drivers || []).forEach(d => { s2byCar[d.car] = d; });
@@ -174,7 +267,7 @@ else if (s1car && s1cmap[s1car]) { const c = s1cmap[s1car]; colors = { primary: 
 let s1colors = null;
 if (s1car && s1cmap[s1car]) { const c = s1cmap[s1car]; s1colors = { primary: c.primary, number: c.number, plate: !!c.plate, grad: c.grad }; }
 const buckets = {};
-if (sp) s1RaceLog(sp, data).forEach(x => { (buckets[x.type] = buckets[x.type] || []).push(x.pos); });
+const s1b = {}; if (sp) s1RaceLog(sp, data).forEach(x => { (buckets[x.type] = buckets[x.type] || []).push(x.pos); (s1b[x.type] = s1b[x.type] || []).push(x.pos); });
 (s2finish[pid] || []).forEach(x => { (buckets[x.type] = buckets[x.type] || []).push(x.pos); });
 const cavg = {}, ccnt = {};
 Object.keys(buckets).forEach(k => { cavg[k] = avgOf(buckets[k]); ccnt[k] = buckets[k].length; });
@@ -183,7 +276,7 @@ const seasonHistory = [];
 const s1row = s1standByPid[pid];
 if (s1row) seasonHistory.push({ season: "1", rank: s1row.rank, pts: s1row.pts, wins: s1row.wins, complete: !!s1.complete });
 entry.seasonHistory = seasonHistory;
-if (sp) entry.s1 = { car: s1car, colors: s1colors, profile: sp };
+if (sp) { const s1ta = {}, s1tc = {}; Object.keys(s1b).forEach(k => { s1ta[k] = avgOf(s1b[k]); s1tc[k] = s1b[k].length; }); entry.s1 = { car: s1car, colors: s1colors, profile: { ...sp, trackTypeAvg: s1ta, trackTypeCount: s1tc } }; }
 if (s2d) {
 const s2avg = {};
 (s2finish[pid] || []).forEach(x => { (s2avg[x.type] = s2avg[x.type] || []).push(x.pos); });
@@ -321,7 +414,7 @@ return (<div>
 function S2Body({ s2, tracks, data }) {
 const a = s2.agg;
 const finMap = {}; (s2.finishes || []).forEach(f => { finMap[f.race] = f; });
-const tt = (t) => ((data.meta && data.meta.trackType && data.meta.trackType[(t || "").trim()]) || "Intermediate");
+const tt = trackTypeOf;
 const strong = [...TYPE_ORDER].filter(t => s2.trackAvg && s2.trackAvg[t] !== undefined).sort((x, y) => s2.trackAvg[x] - s2.trackAvg[y]);
 return (<div>
 <StatGrid pairs={[["Rank", "P" + a.rank], ["Points", a.pts], ["Wins", a.raceW], ["Stage W", a.stageW], ["Top 5", a.t5], ["Top 10", a.t10], ["Avg", a.avg.toFixed(1)], ["Stage Pts", a.sp]]} />
@@ -363,7 +456,105 @@ return (<React.Fragment key={rn}>
 <div style={{ fontSize: 10.5, color: C.muted, fontStyle: "italic", marginTop: 8 }}>A "—" means that race's full running order hasn't been entered yet.</div>
 </div>);
 }
-function DriverModal({ pid, registry, ratings, data, initialSeason, onClose }) {
+const STAT_SCOPES = [["2", "Season 2"], ["1", "Season 1"], ["all", "All-Time"]];
+const fmtSigned = (v) => v == null ? "\u2014" : (v > 0 ? "+" : v < 0 ? "\u2212" : "") + Math.abs(v).toFixed(1);
+const ratingColor = (v) => v == null ? C.muted : v >= 65 ? C.greenBright : v <= 40 ? C.red : C.text;
+function FormCell({ m }) {
+  if (!m || !m.form) return <span style={{ color: C.muted }}>{"\u2014"}</span>;
+  const hot = m.form === "HOT", cool = m.form === "COOL";
+  return <span style={{ color: hot ? C.greenBright : cool ? C.red : C.muted, fontWeight: 700 }}>{hot ? "\u25b2 HOT" : cool ? "\u25bc COOL" : "EVEN"}</span>;
+}
+function StatSheetView({ sheet, registry, onOpenDriver }) {
+  const [scope, setScope] = useState("2");
+  const [sortKey, setSortKey] = useState("pr");
+  const sc = sheet.scopes[scope];
+  const rows = Object.values(sc.rows).filter(m => m.pr != null);
+  const val = (m, k) => k === "form" ? (m.formDelta == null ? null : -m.formDelta) : m[k];
+  rows.sort((a, b) => { const x = val(a, sortKey), y = val(b, sortKey); if (x == null && y == null) return 0; if (x == null) return 1; if (y == null) return -1; return y - x; });
+  const cols = [["pr", "PR"], ["cons", "CONS"], ["pps", "P/ST"], ["clutch", "CLT"]];
+  const sortOpts = [["pr", "Rating"], ["cons", "Consistency"], ["pps", "Pts/Start"], ["clutch", "Clutch"], ["form", "Form"]];
+  const grid = "20px minmax(0,1fr) 30px 34px 40px 38px";
+  const ck = sheet.checks;
+  const allOk = ck.ordersOk === ck.races && ck.winnersOk === ck.races && ck.issues.length === 0;
+  return (<div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div style={{ display: "flex", gap: 6 }}>
+      {STAT_SCOPES.map(([k, l]) => (<button key={k} onClick={() => setScope(k)} className="tbcs-font-body" style={{ flex: 1, padding: "8px 4px", borderRadius: 8, fontWeight: 700, fontSize: 12, cursor: "pointer", background: scope === k ? C.gold : C.panel, color: scope === k ? "#111" : C.text, border: `1px solid ${scope === k ? C.gold : C.line}` }}>{l}</button>))}
+    </div>
+    <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.45 }}>
+      {"Min " + sc.minStarts + " starts. PR and CONS: 50 = average AI driver (" + sc.baselineN + " AI drivers as the baseline)." + (scope !== "2" ? " Pts/Start and Clutch are Season 2 only: Season 1 has finishing positions but no per-race points." : "")}
+    </div>
+    <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+      <span style={{ fontSize: 10, color: C.muted, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Sort</span>
+      {sortOpts.map(([k, l]) => (<button key={k} onClick={() => setSortKey(k)} className="tbcs-font-body" style={{ padding: "4px 9px", borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: "pointer", background: sortKey === k ? C.panel2 : "transparent", color: sortKey === k ? C.gold : C.muted, border: `1px solid ${sortKey === k ? C.gold : C.line}` }}>{l}</button>))}
+    </div>
+    <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
+      <div style={{ display: "grid", gridTemplateColumns: grid, gap: 5, padding: "8px 10px", borderBottom: `1px solid ${C.line}`, alignItems: "center" }}>
+        <div style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>#</div>
+        <div style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>DRIVER</div>
+        {cols.map(([k, l]) => (<div key={k} className="tbcs-font-body" style={{ fontSize: 10, fontWeight: 700, textAlign: "right", color: sortKey === k ? C.gold : C.muted }}>{l}</div>))}
+      </div>
+      {rows.map((m, i) => {
+        const reg = registry[m.pid] || {};
+        const useS1 = scope === "1" && reg.s1;
+        const col = (useS1 ? reg.s1.colors : reg.colors) || { primary: "#3A3F44", number: "#fff", plate: false };
+        const car = useS1 ? reg.s1.car : (reg.s2 ? reg.s2.car : m.pid);
+        return (<div key={m.pid} onClick={() => onOpenDriver(m.pid, scope === "all" ? "2" : scope)} style={{ display: "grid", gridTemplateColumns: grid, gap: 5, alignItems: "center", padding: "7px 10px", cursor: "pointer", borderBottom: `1px solid ${C.line}`, background: i % 2 ? "rgba(255,255,255,0.015)" : "transparent" }}>
+          <div className="tbcs-font-mono" style={{ fontSize: 11.5, fontWeight: 700, color: i === 0 ? C.gold : C.muted }}>{i + 1}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+            <NumberChip car={car} primary={col.primary} number={col.number} plate={col.plate} size="sm" />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{reg.name || "#" + m.pid}</div>
+              <div className="tbcs-font-mono" style={{ fontSize: 9.5 }}><FormCell m={m} /></div>
+            </div>
+          </div>
+          <div className="tbcs-font-display" style={{ textAlign: "right", fontSize: 15, fontWeight: 700, color: ratingColor(m.pr) }}>{m.pr}</div>
+          <div className="tbcs-font-display" style={{ textAlign: "right", fontSize: 15, fontWeight: 700, color: ratingColor(m.cons) }}>{m.cons}</div>
+          <div className="tbcs-font-mono" style={{ textAlign: "right", fontSize: 11.5, color: C.text }}>{m.pps != null ? m.pps.toFixed(1) : "\u2014"}</div>
+          <div className="tbcs-font-mono" style={{ textAlign: "right", fontSize: 11.5, color: m.clutch == null ? C.muted : m.clutch > 0 ? C.greenBright : m.clutch < 0 ? C.red : C.text }}>{fmtSigned(m.clutch)}</div>
+        </div>);
+      })}
+    </div>
+    <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: 12, fontSize: 11, color: C.muted, lineHeight: 1.55 }}>
+      <div style={{ color: C.text, fontWeight: 700, marginBottom: 4 }}>How these are built</div>
+      <div><b style={{ color: C.text }}>PR</b> (performance rating): avg finish 30%, top 10 and top 5 rate 15% each, win rate 15%, consistency 15%, most-laps-led rate 10%. Stage points are left out on purpose, since #15 and #27 never earn them.</div>
+      <div><b style={{ color: C.text }}>CONS</b> (consistency): spread of finishes (std dev) 50%, avg finish 25%, share of top-15 finishes 25%.</div>
+      <div><b style={{ color: C.text }}>PTS/ST</b>: season points per start. <b style={{ color: C.text }}>CLUTCH</b>: finish vs the driver's own average in pressure races (the Chase, and cutline-bubble races from R14 on), needs 6+. Positive means better than usual when it matters. <b style={{ color: C.text }}>FORM</b>: last 5 races vs scope average (HOT is 3+ spots better, COOL is 3+ worse).</div>
+    </div>
+    <div style={{ fontSize: 10.5, color: allOk ? C.muted : C.gold, lineHeight: 1.5, padding: "0 2px" }}>
+      {"Data check: " + ck.ordersOk + "/" + ck.races + " races have 40 unique cars, " + ck.winnersOk + "/" + ck.races + " winners match P1" + (ck.issues.length ? ". Issues: " + ck.issues.join("; ") : ", finish stats match the standings") + "."}
+      {ck.ptsGap.length > 0 ? " Points check: " + ck.ptsGap.length + " driver(s) differ from what the race records add up to (" + ck.ptsGap.map(g => "#" + g.car + " " + (g.stored - g.raw > 0 ? "+" : "") + (g.stored - g.raw)).join(", ") + ")." : " Standings points match the race records for every driver."}
+    </div>
+  </div>);
+}
+function StatBlock({ pid, sheet }) {
+  const avail = STAT_SCOPES.filter(([k]) => sheet && sheet.scopes[k].rows[pid] && sheet.scopes[k].rows[pid].pr != null);
+  const [sel, setSel] = useState(null);
+  if (!sheet) return null;
+  if (avail.length === 0) return (<div style={{ marginBottom: 18 }}>
+    <div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Performance Stats</div>
+    <div style={{ fontSize: 11.5, color: C.muted }}>Needs 10+ starts in a season before ratings show.</div></div>);
+  const key = avail.find(([k]) => k === sel) ? sel : avail[0][0];
+  const m = sheet.scopes[key].rows[pid];
+  const pct = (v) => Math.round(v * 100) + "%";
+  return (<div style={{ marginBottom: 18 }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+      <div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700 }}>Performance Stats</div>
+      <select value={key} onChange={(e) => setSel(e.target.value)} className="tbcs-font-body" style={{ background: C.panel2, color: C.text, border: `1px solid ${C.line}`, borderRadius: 7, fontSize: 11, fontWeight: 700, padding: "4px 8px" }}>
+        {avail.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+      </select>
+    </div>
+    <div style={{ fontSize: 11, color: C.muted, marginBottom: 10 }}>PR and Consistency: 50 = average AI driver.</div>
+    <StatGrid pairs={[["Rating", m.pr], ["Consist.", m.cons], ["Form", m.form || "\u2014"], ["Clutch", m.clutch != null ? fmtSigned(m.clutch) : "\u2014"]]} />
+    <StatGrid pairs={[["Pts/Start", m.pps != null ? m.pps.toFixed(1) : "\u2014"], ["Finish Pts", m.fpps != null ? m.fpps.toFixed(1) : "\u2014"], ["Std Dev", m.sd.toFixed(1)], ["Median", m.med % 1 ? m.med.toFixed(1) : m.med]]} />
+    <StatGrid pairs={[["Top 15", pct(m.t15)], ["Best", m.best], ["Worst", m.worst], ["Starts", m.n]]} />
+    <div style={{ fontSize: 10.5, color: C.muted, lineHeight: 1.5, marginTop: -6 }}>
+      {m.l5 != null ? "Last 5 races avg " + m.l5.toFixed(1) + " vs " + m.avg.toFixed(1) + " for the period. " : ""}
+      {key === "2" ? (m.clutch != null ? "Clutch is over " + m.clutchN + " pressure races. " : "Clutch needs 6+ pressure races (" + (m.clutchN || 0) + " so far). ") + "Finish Pts counts finishing position only." : "Pts/Start and Clutch are Season 2 only."}
+    </div>
+  </div>);
+}
+
+function DriverModal({ pid, registry, ratings, data, sheet, initialSeason, onClose }) {
 const reg = registry[pid];
 const seasonsAvail = [];
 if (reg && reg.s2) seasonsAvail.push("2");
@@ -414,7 +605,7 @@ return (
 </div>
 </div>
 <div style={{ padding: 18 }}>
-{}
+<StatBlock pid={pid} sheet={sheet} />
 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
 <div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
 <Flag size={15} color={C.gold} /> Track Ratings
@@ -613,7 +804,7 @@ const pid = r.winner === "87" ? "27" : r.winner === "24" ? "15" : r.winner;
 return (<div key={r.race} onClick={() => r.winner !== "—" && onOpenDriver(pid, "1")} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 14px", borderTop: `1px solid ${C.line}`, cursor: "pointer" }}>
 <div className="tbcs-font-mono" style={{ width: 26, color: C.muted, fontSize: 12 }}>R{r.race}</div>
 <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.track}</div>
-<div style={{ fontSize: 10.5, color: C.muted }}>{r.type}{r.field < 40 ? ` · ${r.field} cars` : ""}</div></div>
+<div style={{ fontSize: 10.5, color: C.muted }}>{trackTypeOf(r.track)}{r.field < 40 ? ` · ${r.field} cars` : ""}</div></div>
 <CheckerFlag size={11} /><NumberChip car={r.winner} primary={col.primary} number={col.number} plate={col.plate} size="sm" />
 </div>);
 })}
@@ -1146,7 +1337,8 @@ if (faller && faller.d < 0) bits.push(`Sliding: #${faller.pid} ${nameOf(faller.p
 if (leader && p2) bits.push(`Up front, #${leader.car} ${leader.name} leads #${p2.car} ${p2.name} by ${leader.pts - p2.pts} pts.`);
 return { window: `Since ${ref.label}`, text: bits.join(" ") };
 }
-function RatingsTab({ data, ratings, registry, onOpenDriver }) {
+function RatingsTab({ data, ratings, registry, sheet, onOpenDriver }) {
+const [view, setView] = useState("power");
 const hist = data.ratingsHistory || [];
 const ref = hist.length >= 1 ? hist[hist.length - 1] : null;
 const rows = Object.keys(ratings.all.overall).map(pid => {
@@ -1158,8 +1350,13 @@ const col = reg.colors || { primary: "#3A3F44", number: "#fff", plate: false };
 return { pid, ovr, mv, name: reg.name || ("#" + pid), car: reg.s2 ? reg.s2.car : (reg.s1 ? reg.s1.car : pid), col };
 }).sort((a, b) => b.ovr - a.ovr);
 const pr = powerRankingText(data, ratings, registry);
+const viewPills = (<div style={{ display: "flex", gap: 6 }}>
+{[["power", "Power Rankings"], ["stats", "Stat Sheet"]].map(([k, l]) => (<button key={k} onClick={() => setView(k)} className="tbcs-font-body" style={{ flex: 1, padding: "8px 6px", borderRadius: 8, fontWeight: 700, fontSize: 11.5, cursor: "pointer", background: view === k ? C.panel2 : "transparent", color: view === k ? C.gold : C.muted, border: `1px solid ${view === k ? C.gold : C.line}` }}>{l.toUpperCase()}</button>))}
+</div>);
+if (view === "stats") return (<div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 14 }}>{viewPills}<StatSheetView sheet={sheet} registry={registry} onOpenDriver={onOpenDriver} /></div>);
 return (
 <div className="tbcs-font-body" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+{viewPills}
 {pr && (
 <div style={{ background: "linear-gradient(135deg, #1A1D21, #131518)", border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
 <div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, fontStyle: "italic", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
@@ -1252,6 +1449,7 @@ setToast("Data updated — everyone with the link sees it now."); setTimeout(() 
 }, [data]);
 const registry = useMemo(() => buildRegistry(data), [data]);
 const ratings = useMemo(() => computeRatings(registry, (data.seasons["2"].tracks || []).length), [registry, data]);
+const sheet = useMemo(() => computeStatSheet(data, registry), [data, registry]);
 const historical = season === "1";
 const s1avg = useMemo(() => {
 const m = {}; const prof = ((data.seasons["1"] || {}).profiles) || {};
@@ -1293,7 +1491,7 @@ return (<div className="tbcs-font-body" style={{ background: C.bg, minHeight: "1
 {activeTab === "tower" && <TowerTab season={seasonObj} historical={historical} prevMap={prevMap} selectedRace={selectedRace} setSelectedRace={setSelectedRace} onOpenDriver={openDriver} />}
 {activeTab === "chase" && <ChaseTab season={seasonObj} historical={historical} onOpenDriver={openDriver} />}
 {activeTab === "stage" && !historical && <StageTab season={seasonObj} onOpenDriver={openDriver} />}
-{activeTab === "ratings" && <RatingsTab data={data} ratings={ratings} registry={registry} onOpenDriver={openDriver} />}
+{activeTab === "ratings" && <RatingsTab data={data} ratings={ratings} registry={registry} sheet={sheet} onOpenDriver={openDriver} />}
 {activeTab === "trophy" && <TrophyRoomTab registry={registry} onOpenDriver={openDriver} />}
 {activeTab === "owner" && <OwnerTab data={data} historical={historical} />}
 {activeTab === "leaders" && <LeadersTab season={seasonObj} historical={historical} onOpenDriver={openDriver} />}
@@ -1301,7 +1499,7 @@ return (<div className="tbcs-font-body" style={{ background: C.bg, minHeight: "1
 </div>
 <button onClick={() => setAdminOpen(true)} style={{ position: "fixed", bottom: 20, right: 20, width: 52, height: 52, borderRadius: 999, background: C.gold, border: "none", boxShadow: "0 4px 14px rgba(255,201,51,0.5)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 30 }}><Settings size={22} color="#111" /></button>
 {toast && (<div style={{ position: "fixed", bottom: 82, left: "50%", transform: "translateX(-50%)", background: C.panel2, border: `1px solid ${C.line}`, borderRadius: 10, padding: "8px 14px", fontSize: 12, color: C.text, zIndex: 40, whiteSpace: "nowrap" }}>{toast}</div>)}
-{modal && <DriverModal pid={modal.pid} registry={registry} ratings={ratings} initialSeason={modal.season} data={data} onClose={() => setModal(null)} />}
+{modal && <DriverModal pid={modal.pid} registry={registry} ratings={ratings} sheet={sheet} initialSeason={modal.season} data={data} onClose={() => setModal(null)} />}
 {adminOpen && <AdminModal data={data} onClose={() => setAdminOpen(false)} onApply={applyUpdate} />}
 </div>);
 }
