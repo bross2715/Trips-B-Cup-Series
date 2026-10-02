@@ -407,12 +407,6 @@ const p = profile;
 const _log = s1RaceLog(p, data);
 const strong = [...TYPE_ORDER].filter(t => p.trackTypeAvg && p.trackTypeAvg[t] !== undefined).sort((a, b) => p.trackTypeAvg[a] - p.trackTypeAvg[b]);
 return (<div>
-<StatGrid pairs={[["Rank", seasonRank ? "P" + seasonRank : "—"], ["Starts", p.starts], ["Wins", p.wins], ["Top 5", p.t5], ["Top 10", p.t10], ["Avg", p.avg.toFixed(1)], ["Best", "P" + p.best], ["Worst", "P" + p.worst], ["MLL", p.mll]]} />
-{(p.regPts || p.finalChasePts) && (<div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
-{p.regPts && <Tag tone="gold">Reg. Season: {p.regPts} pts</Tag>}
-{p.madeChase && <Tag tone="green">Made the Chase</Tag>}
-{p.finalChasePts && <Tag tone="green">Final Chase: {p.finalChasePts} pts</Tag>}
-</div>)}
 <div className="tbcs-font-display" style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Season 1 Track Strengths</div>
 <div style={{ fontSize: 11.5, color: C.muted, marginBottom: 10 }}>Strongest on <b style={{ color: C.greenBright }}>{strong[0]}</b>{strong.length > 1 ? <> · weakest on <b style={{ color: C.red }}>{strong[strong.length - 1]}</b></> : null}.</div>
 <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: 12, marginBottom: 16 }}>
@@ -436,7 +430,6 @@ const finMap = {}; (s2.finishes || []).forEach(f => { finMap[f.race] = f; });
 const tt = trackTypeOf;
 const strong = [...TYPE_ORDER].filter(t => s2.trackAvg && s2.trackAvg[t] !== undefined).sort((x, y) => s2.trackAvg[x] - s2.trackAvg[y]);
 return (<div>
-<StatGrid pairs={[["Rank", "P" + a.rank], ["Points", a.pts], ["Wins", a.raceW], ["Stage W", a.stageW], ["Top 5", a.t5], ["Top 10", a.t10], ["Avg", a.avg.toFixed(1)], ["Stage Pts", a.sp]]} />
 <div className="tbcs-font-display" style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Season 2 Track Strengths</div>
 {strong.length > 0 ? (<>
 <div style={{ fontSize: 11.5, color: C.muted, marginBottom: 10 }}>Best so far on <b style={{ color: C.greenBright }}>{strong[0]}</b>. Fills in as each race is logged in full.</div>
@@ -556,14 +549,13 @@ const STAT_INFO = [
   ["clutch", "Clutch", (v) => fmtSigned(v), "How much better or worse this driver finishes than their own average in pressure races: the Chase, and races where they were sitting on the cutline. Positive means they step up when it counts. Needs 6+ pressure races."],
   ["form", "Form", (v) => v, "Last 5 races compared with the period average. HOT means 3+ spots better lately, COOL means 3+ worse."]
 ];
-function StatBlock({ pid, sheet }) {
-  const avail = STAT_SCOPES.filter(([k]) => sheet && sheet.scopes[k].rows[pid] && sheet.scopes[k].rows[pid].pr != null);
-  const [sel, setSel] = useState(null);
+function StatBlock({ pid, sheet, scope }) {
   if (!sheet) return null;
+  const avail = (sheet.scopes[scope] && sheet.scopes[scope].rows[pid] && sheet.scopes[scope].rows[pid].pr != null) ? [[scope, scope]] : [];
   if (avail.length === 0) return (<div style={{ marginBottom: 18 }}>
     <div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Performance Stats</div>
     <div style={{ fontSize: 11.5, color: C.muted }}>Needs 10+ starts in a season before ratings show.</div></div>);
-  const key = avail.find(([k]) => k === sel) ? sel : avail[0][0];
+  const key = scope;
   const sc = sheet.scopes[key]; const m = sc.rows[pid];
   const rows = STAT_INFO.map(([k, label, fmt, text]) => {
     let v = k === "form" ? m.form : m[k];
@@ -573,9 +565,7 @@ function StatBlock({ pid, sheet }) {
   return (<div style={{ marginBottom: 18 }}>
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
       <div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700 }}>Performance Stats</div>
-      <select value={key} onChange={(e) => setSel(e.target.value)} className="tbcs-font-body" style={{ background: C.panel2, color: C.text, border: `1px solid ${C.line}`, borderRadius: 7, fontSize: 11, fontWeight: 700, padding: "4px 8px" }}>
-        {avail.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
-      </select>
+      <span className="tbcs-font-body" style={{ fontSize: 11, fontWeight: 700, color: C.muted }}>{scope === "all" ? "Career" : "Season " + scope}</span>
     </div>
     <div style={{ fontSize: 11, color: C.muted, marginBottom: 10 }}>{m.n + " starts. Green means top third of the league, red means bottom third."}</div>
     <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
@@ -596,17 +586,61 @@ function StatBlock({ pid, sheet }) {
   </div>);
 }
 
+/* ===== SEASON PROFILE: one selector (Career / each season) drives the stat bar, rundown grid, performance stats, and track ratings ===== */
+function SeasonProfile({ pid, reg, data, ratings, trophies, view, setView, seasonsAvail }) {
+  const seasons = [...seasonsAvail].sort();
+  const opts = [["career", "Career"]].concat(seasons.map(s => ["s" + s, "Season " + s]));
+  const key = view === "career" ? "career" : "s" + view;
+  const fin1 = reg.s1 ? s1RaceLog(reg.s1.profile, data).map(x => x.pos) : [];
+  const fin2 = reg.s2 ? (reg.s2.finishes || []).map(x => x.pos) : [];
+  const pick = view === "1" ? fin1 : view === "2" ? fin2 : fin1.concat(fin2);
+  const a = reg.s2 ? reg.s2.agg : null; const p = reg.s1 ? reg.s1.profile : null;
+  const n = pick.length;
+  const mean = n ? pick.reduce((x, y) => x + y, 0) / n : null;
+  const wins = view === "1" ? (p ? p.wins : 0) : view === "2" ? (a ? a.raceW : 0) : trophies.wins;
+  const t5 = view === "1" ? (p ? p.t5 : 0) : view === "2" ? (a ? a.t5 : 0) : trophies.t5;
+  const t10 = view === "1" ? (p ? p.t10 : 0) : view === "2" ? (a ? a.t10 : 0) : trophies.t10;
+  const mll = view === "1" ? (p ? p.mll : 0) : view === "2" ? ((a && a.mll) || 0) : ((p ? p.mll : 0) + ((a && a.mll) || 0));
+  const s1rank = (reg.seasonHistory.find(h => h.season === "1") || {}).rank;
+  const lock = (data.seasons["2"] || {}).chaseLock;
+  const s2chase = lock && reg.s2 ? lock.field.some(f => f.car === reg.s2.car) : null;
+  let rank, rankLabel = "Rank", chase;
+  if (view === "1") { rank = s1rank ? "P" + s1rank : "\u2014"; chase = p && p.madeChase ? "Yes" : "No"; }
+  else if (view === "2") { rank = a ? "P" + a.rank : "\u2014"; chase = s2chase == null ? "\u2014" : s2chase ? "Yes" : "No"; }
+  else { rankLabel = "Titles"; rank = String(trophies.championships.length); chase = String((p && p.madeChase ? 1 : 0) + (s2chase ? 1 : 0)); }
+  const stageW = (view === "1") ? "\u2014" : (a ? a.stageW : "\u2014");
+  const ovr = view === "career" ? ratings.all.overall[pid] : ((ratings[view] || {}).overall ? ratings[view].overall[pid] : null);
+  const pairs = [[rankLabel, rank], ["Starts", n], ["Avg", mean != null ? mean.toFixed(1) : "\u2014"], ["Top 3", pick.filter(x => x <= 3).length],
+    ["Best", n ? "P" + Math.min(...pick) : "\u2014"], ["Worst", n ? "P" + Math.max(...pick) : "\u2014"], ["Laps Led", mll], ["Stage W", stageW]];
+  const num = (v, l) => (<div style={{ textAlign: "center" }}><div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{v}</div><div style={{ fontSize: 8.5, color: C.muted, fontWeight: 700, textTransform: "uppercase" }}>{l}</div></div>);
+  return (<div style={{ padding: "12px 18px 0" }}>
+    <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+      {opts.map(([k, l]) => { const on = key === k; return (<button key={k} onClick={() => setView(k === "career" ? "career" : k.slice(1))} className="tbcs-font-body" style={{ flex: 1, padding: "8px 4px", borderRadius: 9, fontWeight: 700, fontSize: 12, cursor: "pointer", background: on ? C.gold : C.panel, color: on ? "#111" : C.text, border: `1px solid ${on ? C.gold : C.line}` }}>{l}</button>); })}
+    </div>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 14px", marginBottom: 10 }}>
+      <TrophyStack championships={trophies.championships} />
+      <div style={{ display: "flex", gap: 14 }}>{num(wins, "Wins")}{num(t5, "Top 5")}{num(t10, "Top 10")}</div>
+    </div>
+    <StatGrid pairs={pairs} />
+    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+      <span className="tbcs-font-body" style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 700 }}>{(view === "career" ? "Career" : "Season " + view) + " OVR"}</span>
+      <TierBadge overall={ovr} />
+      <span style={{ fontSize: 10.5, color: C.muted, marginLeft: "auto" }}>{"Chase: " + chase + (view === "career" ? " seasons" : "")}</span>
+    </div>
+  </div>);
+}
+
 function DriverModal({ pid, registry, ratings, data, sheet, initialSeason, onClose }) {
 const reg = registry[pid];
 const seasonsAvail = [];
 if (reg && reg.s2) seasonsAvail.push("2");
 if (reg && reg.s1) seasonsAvail.push("1");
 const [seasonView, setSeasonView] = useState(seasonsAvail.includes(initialSeason) ? initialSeason : (seasonsAvail[0] || "2"));
-const [trackSeasonView, setTrackSeasonView] = useState("all");
 if (!reg) return null;
-const active = seasonView === "1" ? reg.s1 : reg.s2;
+const trackSeasonView = seasonView === "career" ? "all" : seasonView;
+const active = seasonView === "1" ? reg.s1 : seasonView === "2" ? reg.s2 : (reg.s2 || reg.s1);
 const col = (active && active.colors) || reg.colors || { primary: "#3A3F44", number: "#fff", plate: false, grad: ["#3A3F44", "#14171A"] };
-const chipCar = seasonView === "1" ? (reg.s1 ? reg.s1.car : pid) : (reg.s2 ? reg.s2.car : pid);
+const chipCar = seasonView === "1" ? (reg.s1 ? reg.s1.car : pid) : (seasonView === "2" ? (reg.s2 ? reg.s2.car : pid) : (reg.s2 ? reg.s2.car : (reg.s1 ? reg.s1.car : pid)));
 const grad = col.grad || [col.primary, col.primary];
 const trophies = computeTrophies(pid, registry);
 const trackOptions = [{ key: "all", label: "All-Time", track: ratings.all.track[pid], bars: reg.combinedTrackAvg, count: reg.combinedTrackCount }];
@@ -636,48 +670,21 @@ return (
 <div style={{ position: "absolute", top: 14, right: 52, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
 <ShieldCrest overall={ratings.all.overall[pid]} size={58} />
 </div>
-<div style={{ padding: "12px 18px 0" }}>
-<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 14px" }}>
-<TrophyStack championships={trophies.championships} />
-<div style={{ display: "flex", gap: 14 }}>
-<div style={{ textAlign: "center" }}><div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{trophies.wins}</div><div style={{ fontSize: 8.5, color: C.muted, fontWeight: 700, textTransform: "uppercase" }}>Wins</div></div>
-<div style={{ textAlign: "center" }}><div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{trophies.t5}</div><div style={{ fontSize: 8.5, color: C.muted, fontWeight: 700, textTransform: "uppercase" }}>Top 5</div></div>
-<div style={{ textAlign: "center" }}><div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{trophies.t10}</div><div style={{ fontSize: 8.5, color: C.muted, fontWeight: 700, textTransform: "uppercase" }}>Top 10</div></div>
-</div>
-</div>
-</div>
+<SeasonProfile pid={pid} reg={reg} data={data} ratings={ratings} trophies={trophies} view={seasonView} setView={setSeasonView} seasonsAvail={seasonsAvail} />
 <div style={{ padding: 18 }}>
-<StatBlock pid={pid} sheet={sheet} />
+<StatBlock pid={pid} sheet={sheet} scope={seasonView === "career" ? "all" : seasonView} />
 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
 <div className="tbcs-font-display" style={{ fontSize: 15, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
 <Flag size={15} color={C.gold} /> Track Ratings
 </div>
-<select value={trackSeasonView} onChange={(e) => setTrackSeasonView(e.target.value)} className="tbcs-font-body" style={{ background: C.panel2, color: C.text, border: `1px solid ${C.line}`, borderRadius: 7, fontSize: 11, fontWeight: 700, padding: "4px 8px" }}>
-{trackOptions.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
-</select>
+<span className="tbcs-font-body" style={{ fontSize: 11, fontWeight: 700, color: C.muted }}>{trackSel.label}</span>
 </div>
 <div style={{ fontSize: 11, color: C.muted, marginBottom: 10 }}>Each track type graded 0–99 against the field that season.</div>
 <div style={{ marginBottom: 12 }}><RatingChips track={trackSel.track} /></div>
 <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: 12, marginBottom: 18 }}>
 <TrackTypeBars trackTypeAvg={trackSel.bars} trackTypeCount={trackSel.count} />
 </div>
-{}
-{seasonsAvail.length > 0 && (
-<div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-{seasonsAvail.map(s => (
-<button key={s} onClick={() => setSeasonView(s)} className="tbcs-font-body" style={{
-flex: 1, padding: "9px 4px", borderRadius: 9, fontWeight: 700, fontSize: 12.5, cursor: "pointer",
-background: seasonView === s ? C.gold : C.panel, color: seasonView === s ? "#111" : C.text,
-border: `1px solid ${seasonView === s ? C.gold : C.line}` }}>Season {s} Profile</button>
-))}
-</div>
-)}
-{seasonsAvail.length > 0 && (
-<div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-<span className="tbcs-font-body" style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 700 }}>Season {seasonView} OVR</span>
-<TierBadge overall={(ratings[seasonView] || {}).overall ? ratings[seasonView].overall[pid] : null} />
-</div>
-)}
+{seasonView === "career" && <div style={{ fontSize: 11.5, color: C.muted, marginBottom: 6 }}>Pick a season at the top to see its track strengths and race log.</div>}
 {seasonView === "1" && reg.s1 && <S1Body profile={reg.s1.profile} data={data} seasonRank={(reg.seasonHistory.find(h => h.season === "1") || {}).rank} />}
 {seasonView === "2" && reg.s2 && <S2Body s2={reg.s2} tracks={data.seasons["2"].tracks} data={data} />}
 </div>
